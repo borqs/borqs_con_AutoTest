@@ -18,18 +18,16 @@ function Basic_Wireless_Settings() {
 #eg: "ssid_24g=wlan_autotest, network_mode_24g=mixed, ssid_broadcast_24g=0"
   local arg=$1
   local user="admin:admin"
-  local network_mode_5g="mixed"
+  local network_mode_5g="NETWORK_MODE_BG"
   local ssid_5g=${SSID_5G}
   local channel_width_5g="0"
   local channel_5g="0"
   local ssid_broadcast_5g="0"
-  local network_mode_24g="mixed"
+  local network_mode_24g="NETWORK_MODE_BG"
   local ssid_24g=${SSID}
   local channel_width_24g="0"
   local channel_24g="0"
   local ssid_broadcast_24g="0"
-
-
 
   [ "${arg}" != "" ] &&
   for i in 1 2 3 4 5 6 7 8 9 10 ;do 
@@ -160,5 +158,11 @@ function Click_WiFi_Protected_Setup_Button() {
 ###
 ######################################################################################################
 function disable_DHCP_and_setting_default_SSID() {
+  echo "${FUNCNAME} success"
+}
+######################################################################################################
+###
+######################################################################################################
+function Disable_SSID() {
   echo "${FUNCNAME} success"
 }
