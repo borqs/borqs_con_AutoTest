@@ -166,3 +166,7 @@ function disable_DHCP_and_setting_default_SSID() {
 function Disable_SSID() {
   echo "${FUNCNAME} success"
 }
+
+function set_ap_ops() {
+  echo "${FUNCNAME} success"
+}

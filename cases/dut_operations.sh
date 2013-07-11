@@ -542,56 +542,45 @@ function clean_wifi_operations() {
 #####################################################################################
 function browser_load_web() {
   local arg=$1
-  local http=`echo $arg | grep "http=" | awk -F "," '{ print $1 }' | awk -F "=" '{ print $2} '`
-  local png=`echo $arg | grep "png=" | awk -F "," '{ print $2 }' | awk -F "=" '{ print $2} '`
-  
-  if [ ${http} = "" ] || [ ${png} = "" ]; then
-    echo "$FUNCNAME fail"
+  local http=${WEB_INDEX}
+  local png=${FUNCNAME}.png
+  local name=""
+
+  [ "${arg}" != "" ] &&
+  for i in 1 2 3; do 
+    local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
+    local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
+    case $var in  
+    "http")
+      http=${value}
+      ;;  
+    "png")
+      png=${value}
+      ;;  
+    "name")
+      name=${value}
+      ;;  
+    esac
+  done
+
+#download data
+  if [ "${name}" != "" ]; then
+    [ "(adb_push src=${PC_CURL},des=${DUT_CURL})" = "adb_push fail" ] && echo "${FUNCNAME} fail" && return
+    adb -s ${DEVICES_MASTER} shell curl -o ${DUT_DOWNLOAD_DIR}/${name} ${http} > /dev/null
+    sleep 3s
+    adb -s ${DEVICES_MASTER} pull ${DUT_DOWNLOAD_DIR}/${name} ${PC_DOWNLOAD_DIR}/${name} > /dev/null
+    [ -e "${PC_DOWNLOAD_DIR}/${name}" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
     return
   fi
-
+    
+#open web page
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.intent.action.VIEW -d "${http}" > /dev/null
   sleep 5s
-  if [ "$(adb_screencap png=${png})" = "adb_screencap success" ]; then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
-  fi
+
+  [ "$(adb_screencap png=${png})" = "adb_screencap success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
 }
 
-####################################################################################
-##eg: download_data_via_browser file_name=http://www.*******
-####################################################################################
-function download_data_via_browser() {
-  local arg=$1
-  local http=`echo ${arg} | grep "http=" | awk -F "," '{ print $1 }' | awk -F "=" '{ print $2 }'`
-  local file_name=`echo ${arg} | grep "file_name=" | awk -F "," '{ print $2 }' | awk -F "=" '{ print $2 }'`
-  local file_path_name="${DUT_DOWNLOAD_DIR}/${file_name}"
-
-  if [ "${file_name}" = "" ] || [ "${http}" = "" ] ;then
-    echo "$FUNCNAME fail"
-    return
-  fi
-
-  cursor_back_home
-  adb -s ${DEVICES_MASTER} remount > /dev/null
-  adb -s ${DEVICES_MASTER} root > /dev/null
-  adb -s ${DEVICES_MASTER} push ${CURL} /system/bin/ > /dev/null
-  adb -s ${DEVICES_MASTER} shell curl -o ${file_path_name} ${http} > /dev/null
-  sleep 3s
-  adb -s ${DEVICES_MASTER} pull ${file_path_name} ${DOWNLOAD_DIR}/${file_name} > /dev/null
- 
-  if [ -e "${DOWNLOAD_DIR}/${file_name}" ] ; then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
-  fi 
-}
-
-#####################################################################################
-##
-#####################################################################################
 function reload_wpa_supplicant_conf() {
   local wpa_conf=${WPA_SUPPLICANT_CONF}
   local arg=$1
@@ -615,7 +604,6 @@ function reload_wpa_supplicant_conf() {
     echo "$FUNCNAME fail"
   fi
 }
-
 
 #################################################################################
 ##
@@ -694,9 +682,11 @@ function screen_captrue_advances() {
   local arg=$1
   local ip_mac=false
   local freq_band=false
+  local set_freq_band=""
+  local png=${FUNCNAME}.png
 
   [ "${arg}" != "" ] &&
-  for i in 1 2 3; do 
+  for i in 1 2 3 4; do 
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
     case $var in  
@@ -708,6 +698,9 @@ function screen_captrue_advances() {
       ;;
     "png")
       png=${value}
+      ;;
+    "set_freq_band")
+      set_freq_band=${value}
       ;;
     esac
   done
@@ -723,6 +716,8 @@ function screen_captrue_advances() {
   elif [ "${freq_band}" = "true" ]; then
     cursor_go 4
     cursor_click
+    [ "${set_freq_band}" = "24g" ] && cursor_go 3
+    [ "${set_freq_band}" = "5g" ] && cursor_go 2
   fi
 
   if [ "$(adb_screencap ${png})" = "adb_screencap success" ] ;then
@@ -781,19 +776,46 @@ function screen_captrue_ssid() {
   cursor_back
 }
 
-function adb_push_iperf() {
-###push iperf
-  local check_iperf=`adb shell ls /system/bin/iperf | grep "No such file"`
-  [ "${check_iperf}" = "" ] && echo "$FUNCNAME success" && return
+function adb_push() {
+  local arg=$1
+  local src=""
+  local des=""
 
-  [ -e ${IPERF} ] || ( echo "$FUNCNAME fail" && return )
+  [ "${arg}" != "" ] &&
+  for i in 1 2; do 
+    local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
+    local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
+    case $var in  
+    "src")
+      src=${value}
+      ;;  
+    "des")
+      des=${value}
+      ;; 
+    esac
+  done 
+
+  if [ "${src}" = "" ] || [ "${des}" = "" ]; then
+    echo "$FUNCNAME fail" && return
+  fi
+
+###Check des wether exist or not ?
+  local check=`adb shell ls ${des} | grep "No such file"`
+  [ "${check}" = "" ] && echo "$FUNCNAME success" && return
+  [ -e ${src} ] || 
+  {
+    echo "$FUNCNAME fail" && return
+  }
+
+#Just come to do job
   adb -s ${DEVICES_MASTER} root > /dev/null
   adb -s ${DEVICES_MASTER} remount > /dev/null
-  adb -s ${DEVICES_MASTER} push ${IPERF} /system/bin/iperf > /dev/null 
+  adb -s ${DEVICES_MASTER} push ${src} ${des} > /dev/null 
   sleep 1s
 
-  local no_iperf=`adb shell ls /system/bin/iperf | grep "No such file"`
-  [ "${no_iperf}" = "" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  check=`adb shell ls ${des} | grep "No such file"`
+  [ "${check}" = "" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+
 }
 
 function pc_iperf_c() {
@@ -856,4 +878,16 @@ function dut_kill_9_iperf_s() {
   for pid in ${pids[*]}; do
     adb shell kill -9 ${pid} > /dev/null
   done
+}
+
+function work_tag() {
+  echo " " >> ${OK_FAIL} && echo "$1 ..." >> ${OK_FAIL}
+}
+
+function check() {
+  echo "$1 [CHECK]" >> ${OK_FAIL}
+}
+
+function manual() {
+  echo "$1 [MANUAL]" >> ${OK_FAIL}
 }
