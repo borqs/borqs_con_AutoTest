@@ -631,7 +631,7 @@ function PFT_2550_Can_config_static_IP_for_AP_on_PUT() {
 }
 
 ### Test Case ID PFT-2551 AP channel 1-13 
-function PFT_2552_AP_channel_1_13() {
+function PFT_2551_AP_channel_1_13() {
   echo " " >> ${OK_FAIL} && echo "$FUNCNAME ..." >> ${OK_FAIL}
   
   [ "$(master_clear)" = "master_clear success" ] && {
@@ -672,6 +672,79 @@ function PFT_2553_WiFi_throughput_test() {
   echo "${FUNCNAME} [CHECK]" >> ${OK_FAIL}
   echo "${FUNCNAME} [!!!]: Please Keep RSSI [70, 80] And Do again" >> ${OK_FAIL}
 }
+
+### Test Case ID PFT-2554 Add a AP profile with None
+function PFT_2254_Add_a_AP_profile_with_None() {
+  echo " " >> ${OK_FAIL} && echo "$FUNCNAME ..." >> ${OK_FAIL}
+ 
+  [ "$(clean_wifi_operations)" = "clean_wifi_operations fail" ] &&
+  echo "$FUNCNAME clean_wifi_operations [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  
+  [ "$(Basic_Wireless_Settings ssid_broadcast_24g=${SSID_HIDE})" = "Basic_Wireless_Settings fail" ] &&
+  echo "$FUNCNAME Basic_Wireless_Settings [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  [ "$(Wireless_Security security_mode_24g={SECURT_MODE_NONE})" = "Wireless_Security fail" ] &&
+  echo "$FUNCNAME Wireless_Security [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  
+  [ "$(add_network mode={SECURT_MODE_NONE})" = "add_network success" ] &&
+  [ "$(adb_screencap png=${FUNCNAME}.png)" = "adb_screencap success" ] &&
+  echo "${FUNCNAME} [CHECK]" >> ${OK_FAIL}
+}
+
+### Test Case ID PFT-2555 Add a AP profile with WEP 
+function PFT_2255_Add_a_AP_profile_with_WEP() {
+  echo " " >> ${OK_FAIL} && echo "$FUNCNAME ..." >> ${OK_FAIL}
+ 
+  [ "$(clean_wifi_operations)" = "clean_wifi_operations fail" ] &&
+  echo "$FUNCNAME clean_wifi_operations [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  
+  [ "$(Basic_Wireless_Settings ssid_broadcast_24g=${SSID_HIDE})" = "Basic_Wireless_Settings fail" ] &&
+  echo "$FUNCNAME Basic_Wireless_Settings [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  [ "$(Wireless_Security security_mode_24g={SECURT_MODE_WEP})" = "Wireless_Security fail" ] &&
+  echo "$FUNCNAME Wireless_Security [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  
+  [ "$(add_network mode={SECURT_MODE_WEP})" = "add_network success" ] &&
+  [ "$(adb_screencap png=${FUNCNAME}.png)" = "adb_screencap success" ] &&
+  echo "${FUNCNAME} [CHECK]" >> ${OK_FAIL}
+}
+
+### Test Case ID PFT-2556 Add a AP profile with WPA2 
+function PFT_2256_Add_a_AP_profile_with_WPA2() {
+  echo " " >> ${OK_FAIL} && echo "$FUNCNAME ..." >> ${OK_FAIL}
+ 
+  [ "$(clean_wifi_operations)" = "clean_wifi_operations fail" ] &&
+  echo "$FUNCNAME clean_wifi_operations [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  
+  [ "$(Basic_Wireless_Settings ssid_broadcast_24g=${SSID_HIDE})" = "Basic_Wireless_Settings fail" ] &&
+  echo "$FUNCNAME Basic_Wireless_Settings [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  [ "$(Wireless_Security security_mode_24g={SECURT_MODE_WPA_WPA2})" = "Wireless_Security fail" ] &&
+  echo "$FUNCNAME Wireless_Security [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  
+  [ "$(add_network mode={SECURT_MODE_WPA_WPA2})" = "add_network success" ] &&
+  [ "$(adb_screencap png=${FUNCNAME}.png)" = "adb_screencap success" ] &&
+  echo "${FUNCNAME} [CHECK]" >> ${OK_FAIL}
+}
+
+
+### Test Case ID PFT-2557 Support add use-configured AP with None/WEP/ WPA/WPA2 PSK/802.11x EAP 
+function PFT_2257_Support_add_use_configured_AP_with_None_WEP_WPA2_802.11x_EAP() {
+  echo " " >> ${OK_FAIL} && echo "$FUNCNAME ..." >> ${OK_FAIL}
+ 
+  [ "$(clean_wifi_operations)" = "clean_wifi_operations fail" ] &&
+  echo "$FUNCNAME clean_wifi_operations [FAIL]" >> ${OK_FAIL} && sleep 2s && return
+  
+  
+  [ "$(add_network mode={SECURT_MODE_NONE}, ssid='PFT_2557_NONE')" = "add_network success" ] 
+  [ "$(add_network mode={SECURT_MODE_WPA_WPA2}, ssid='PFT_2557_WPA2')" = "add_network success" ] 
+  [ "$(add_network mode={SECURT_MODE_WEP}, ssid='PFT_2557_WEP')" = "add_network success" ] 
+  [ "$(add_network mode={SECURT_MODE_80211x_EAP, ssid='PFT_2557_EAP')" = "add_network success" ] 
+  [ "$(adb_screencap png=${FUNCNAME}.png,locate=${FUNCNAME}.png)" = "adb_screencap success" ]
+ 
+  echo "${FUNCNAME} [CHECK]" >> ${OK_FAIL}
+}
+
+
+
+
 
 
 ######################################################################################
@@ -984,7 +1057,7 @@ function DUT_Download_Data_Throughput_Network_80211N_RSSI_50_to_70() {
   echo "$FUNCNAME success"
 }
 
-add_network ssid=chengkai,mode=${SECURT_MODE_WPA_WPA2},password=777777777,show_password=true,password_png=b734.png,show_advances=true,enable_advances=true,advances_png=b734_2.png,ip_address=192.168.1.33
+#add_network ssid=chengkai,mode=${SECURT_MODE_WPA_WPA2},password=777777777,show_password=true,password_png=b734.png,show_advances=true,enable_advances=true,advances_png=b734_2.png,ip_address=192.168.1.33
 
 
 

@@ -3,15 +3,24 @@
 ################################################################################
 ##operations for cursor
 ################################################################################
-function reset_cursor_to_top() {
-  for((i=0; i<10; i++)); do
+function cursor_up_rel() {
+  local n=$1
+  for((i=0; i<$n; i++)); do
     adb -s ${DEVICES_MASTER} shell input keyevent 19
   done
   sleep 1s
 }
 
-function reset_cursor_to_top_20() {
-  for((i=0; i<20; i++)); do
+function cursor_down_rel() {
+  local n=$1
+  for((i=0; i<$n; i++)); do
+    adb -s ${DEVICES_MASTER} shell input keyevent 20
+  done
+  sleep 1s
+}
+
+function reset_cursor_to_top() {
+  for((i=0; i<10; i++)); do
     adb -s ${DEVICES_MASTER} shell input keyevent 19
   done
   sleep 1s
@@ -20,6 +29,21 @@ function reset_cursor_to_top_20() {
 function reset_cursor_to_bottom() {
   for((i=0; i<10; i++)); do
     adb -s ${DEVICES_MASTER} shell input keyevent 20
+  done
+  sleep 1s
+}
+
+function cursor_go() {
+  local n=$1
+  reset_cursor_to_top  
+  for((i=0; i<$n; i++)); do
+    adb -s ${DEVICES_MASTER} shell input keyevent 20
+  done
+}
+
+function reset_cursor_to_top_20() {
+  for((i=0; i<20; i++)); do
+    adb -s ${DEVICES_MASTER} shell input keyevent 19
   done
   sleep 1s
 }
@@ -666,78 +690,95 @@ function master_clear() {
 ##################################################################################
 ##
 ##################################################################################
-function screen_captrue_IP_MAC() {
+function screen_captrue_advances() {
   local arg=$1
+  local ip_mac=false
+  local freq_band=false
 
+  [ "${arg}" != "" ] &&
+  for i in 1 2 3; do 
+    local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
+    local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
+    case $var in  
+    "ip_mac")
+      ip_mac=${value}
+      ;;  
+    "freq_band")
+      freq_band=${value}
+      ;;
+    "png")
+      png=${value}
+      ;;
+    esac
+  done
+  
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.WIFI_IP_SETTINGS > /dev/null
   sleep 3s
 
-  if [ "$(adb_screencap ${arg})" = "adb_screencap success" ] ;then
-    echo "${FUNCNAME} success"
-  else 
-    echo "${FUNCNAME} fail"
-  fi
-  cursor_back
-}
-
-###################################################################################
-##
-###################################################################################
-function screen_captrue_last_ssid() {
-  local arg=$1
-
-  if [ "$(open_wifi)" = "open_wifi fail" ]; then 
-    echo "$FUNCNAME fail"
-    return
-  fi
-
-  reset_cursor_to_bottom_20
-  cursor_up
-  cursor_click
-  sleep 3s
-
-  if [ "$(adb_screencap ${arg})" = "adb_screencap success" ] ;then
-    echo "${FUNCNAME} success"
-  else 
-    echo "${FUNCNAME} fail"
-  fi
-  reset_cursor_to_top_20
-  cursor_back
-}
-
-
-function screen_captrue_first_ssid() {
-  local arg=$1
-
-  if [ "$(open_wifi)" = "open_wifi fail" ]; then 
-    echo "$FUNCNAME fail"
-    return
-  fi
-  if [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] ;then
-    echo "$FUNCNAME fail"
-    return
-  fi
-
   reset_cursor_to_top
-  cursor_down
-  cursor_click
-  sleep 3s
 
-  if [ "$(adb_screencap ${arg})" = "adb_screencap success" ] ;then
+  if [ "${ip_mac}" = "true" ]; then
+    reset_cursor_to_bottom
+  elif [ "${freq_band}" = "true" ]; then
+    cursor_go 4
+    cursor_click
+  fi
+
+  if [ "$(adb_screencap ${png})" = "adb_screencap success" ] ;then
     echo "${FUNCNAME} success"
   else 
     echo "${FUNCNAME} fail"
   fi
+
+#Be sure that there is not any dialog show before quit
+  cursor_back
   cursor_back
 }
 
 function screen_captrue_ssid() {
   local arg=$1
+  local png="${FUNCNAME}.png"
+  local locate="head"
+  
+  [ "${arg}" != "" ] &&
+  for i in 1 2; do 
+    local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
+    local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
+    case $var in  
+    "png")
+      png=${value}
+      ;;  
+    "locate")
+      locate=${value}
+      ;;
+    esac
+  done
 
   [ "$(open_wifi)" = "open_wifi fail" ] && echo "${FUNCNAME} fail" && return
+  
+  if [ "${locate}" = "first" ]; then
+    [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && echo "${FUNCNAME} fail" && return
+    reset_cursor_to_top
+    cursor_down
+    cursor_click
+  elif [ "${locate}" = "head" ]; then
+    reset_cursor_to_top
+  elif [ "${locate}" = "tail" ]; then
+    reset_cursor_to_bottom_20
+  elif [ "${locate}" = "last" ]; then
+    reset_cursor_to_bottom_20
+    cursor_up
+    cursor_click
+  fi
+
   sleep 3s
-  [ "$(adb_screencap ${arg})" = "adb_screencap success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+
+  [ "$(adb_screencap ${png})" = "adb_screencap success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+
+# Maybe you have reset_cursor_to_bottom_20, reset_cursor_to_top would accurate that your cursor stay head 
+  reset_cursor_to_top_20
+  cursor_back
 }
 
 function adb_push_iperf() {
