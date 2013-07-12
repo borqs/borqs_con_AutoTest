@@ -163,10 +163,132 @@ function disable_DHCP_and_setting_default_SSID() {
 ######################################################################################################
 ###
 ######################################################################################################
-function Disable_SSID() {
+function switch_off_ap() {
   echo "${FUNCNAME} success"
 }
 
 function set_ap_ops() {
-  echo "${FUNCNAME} success"
+  local arg=$1
+  local switch="on"
+
+  local dhcp=true
+
+#Basic_Wireless_Settings :
+  local network_mode_5g=${NETWORK_MODE_BG}
+  local ssid_5g=${SSID_5G}
+  local channel_width_5g="auto"
+  local channel_5g="auto"
+  local ssid_broadcast_5g=true
+  local network_mode_24g=${NETWORK_MODE_BG}
+  local ssid_24g=${SSID}
+  local channel_width_24g="auto"
+  local channel_24g="auto"
+  local ssid_broadcast_24g=true
+
+#Setting_Default_SSID :
+  local security_mode_5g=${SECURT_MODE_WPA_WPA2}
+  local passphrase_5g=${SSID_PASSWORD}
+  local security_mode_24g=${SECURT_MODE_WPA_WPA2}
+  local passphrase_24g=${SSID_PASSWORD}
+
+#WPS :
+  local wps_click_button=false
+
+#Vars below maybe invalid now, We may expand some functions in furture:
+  local wpa_encrypt_method=${WPA_ENCRPPT_AES}
+ 
+  [ "${arg}" != "" ] &&
+  for i in 1 2 3 4 ;do 
+    local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
+    local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
+    case $var in 
+    "switch")
+      switch=${value}
+      ;;
+    "dhcp")
+      dhcp=${value}
+      ;;
+    "network_mode_5g")
+      network_mode_5g=${value}
+      ;;
+    "ssid_5g")
+      ssid_5g=${value}
+      ;;
+    "channel_width_5g")
+      channel_width_5g=${value}
+      ;;
+    "channel_5g")
+      channel_5g=${value}
+      ;;
+    "ssid_broadcast_5g")
+      ssid_broadcast_5g=${value}
+      ;;
+    "network_mode_24g")
+      network_mode_24g=${value}
+      ;;
+    "ssid_24g")
+      ssid_24g=${value}
+      ;;
+    "channel_width_24g")
+      channel_width_24g=${value}
+      ;;
+    "channel_24g")
+      channel_24g=${value}
+      ;;
+    "ssid_broadcast_24g")
+      ssid_broadcast_24g=${value}
+      ;;
+    "network_mode_5g")
+      network_mode_5g=${value}
+      ;;
+    "security_mode_5g")
+      security_mode_5g=${value}
+      ;;
+    "passphrase_5g")
+      passphrase_5g=${value}
+      ;;
+    "security_mode_24g")
+      security_mode_24g=${value}
+      ;;
+    "passphrase_24g")
+      passphrase_24g=${value}
+      ;;
+    "wps_click_button")
+      wps_click_button=${value}
+      ;;
+    "wpa_encrypt_method")
+      wpa_encrypt_method=${value}
+      ;;
+    esac
+  done
+
+  if [ "$(switch)" = "off" ]; then
+    [ "$(switch_off_ap)" = "switch_off_ap fail" ] && echo "${FUNCNAME} fail" && return
+  fi
+
+  sleep 3s
+
+  if [ "$(Basic_Wireless_Settings net_mode_24g=${net_mode_24g},ssid_24g=${ssid_24g},channel_width_24g=${channel_width_24g},channel_24g=${channel_24g},ssid_broadcast_24g=${ssid_broadcast_24g},net_mode_5g=${net_mode_5g},ssid_5g=${ssid_5g},channel_width_5g=${channel_width_5g},channel_5g=${channel_5g},ssid_broadcast_5g=${ssid_broadcast_5g})" = "Basic_Wireless_Settings fail" ]; then
+    echo "${FUNCNAME} fail" && return
+  fi
+
+  sleep 3s
+
+  if [ "$(Setting_Default_SSID security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g})" = "Setting_Default_SSID success" ]; then
+    echo "${FUNCNAME} fail"  && return
+  fi
+
+  if [ "${wps_click_button}" = "true" ]; then
+    sleep 3s
+    [ "$(Click_WiFi_Protected_Setup_Button)" = "Click_WiFi_Protected_Setup_Button fail" ] &&
+    echo "${FUNCNAME} fail" && return
+  fi
+   
+  if [ "${dhcp}" = "true" ]; then
+    sleep 3s
+    echo "${FUNCNAME} success" 
+  fi
+
 }
+
+

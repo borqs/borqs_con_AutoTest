@@ -11,12 +11,19 @@ export SSID_5G="wlan_autotest_5G"
 export BSSID="58:6d:8f:85:cf:56"
 export SSID_PASSWORD="12345678"
 export SSID_PASSWORD_WEP="1234567890"
+export SECURT_MODE_WPA=""
+export SECURT_MODE_WPA2=""
 export SECURT_MODE_WPA_WPA2="wpa2_personal"
 export SECURT_MODE_WEP="wep"
 export SECURT_MODE_NONE="none"
-export NETWORK_MODE_BG="mixed"
 export NETWORK_MODE_A=""
+export NETWORK_MODE_B=""
+export NETWORK_MODE_G=""
+export NETWORK_MODE_BG="mixed"
 export NETWORK_MODE_N=""
+export NETWORK_MODE_BGN=""
+export WPA_ENCRPPT_AES="aes"
+export WPA_ENCRPPT_TKIP="tkip"
 export AP_IP_ADDR="192.168.1.1"
 export PC_IP_ADDR="192.168.1.222"
 export DUT_IP_ADDR="192.168.1.111"
@@ -878,43 +885,459 @@ function PFT_2582_Add_a_AP_with_OPEN_manually_Forget_AP() {
 function PFT_2583_Ap_with_OPEN_Disable_DHCP_Hide_SSID_Manual_add_Donot_have_static_IP_Forget_AP() {
   work_tag ${FUNCNAME}
 
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(add_network mode=${SECURT_MODE_NONE})" = "add_network fail" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
 }
 
-######################################################################################
-###Part 4 :    WPA/WPA2 PSK
-######################################################################################
-###Test Case ID PFT-2590 Add a AP with WPA/WPA2 PSK manually+Forget AP
-function PFT_2590_Add_a_ap_with_WPA_WPA2_PSK_manually_Forget_AP() {
-  echo " " >> ${OK_FAIL}
-  echo "$FUNCNAME ..." >> ${OK_FAIL}
- 
-  [ "$(clean_wifi_operations)" = "clean_wifi_operations fail" ] &&
-  echo "$FUNCNAME clean_wifi_operations [FAIL]" >> ${OK_FAIL} && 
-  sleep 2s && return
+### Test Case ID PFT-2584 Ap with OPEN+Disable DHCP+Hide SSID+Manual add+have static IP+Forget AP
+function PFT_2584_Ap_with_OPEN_Disable_DHCP_Hide_SSID_Manual_add_have_static_IP_Forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(Basic_Wireless_Settings ssid_24g=PFT_2590,ssid_broadcast_24g=1)" = "Basic_Wireless_Settings fail" ] &&
-  echo "$FUNCNAME Setting_SSID [FAIL]" >> ${OK_FAIL} && 
-  sleep 2s && return
-  [ "$(Wireless_Security)" = "Wireless_Security fail" ] &&
-  echo "$FUNCNAME Wireless_Security [FAIL]" >> ${OK_FAIL} && 
-  sleep 2s && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(add_network ssid=PFT_2590,mode=${SECURT_MODE_WPA_WPA2},password=${SSID_PASSWORD})" = "add_network success" ] &&
-  sleep 15s &&
-  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
-  [ "$(screen_captrue_first_ssid png=${FUNCNAME}_con1.png)" = "screen_captrue_first_ssid success" ] &&
-  echo "$FUNCNAME [CHECK1]" >> ${OK_FAIL}
+  [ "$(add_network mode=${SECURT_MODE_NONE},enable_advances=true)" = "add_network success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png=${FUNCNAME}_con.png)" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
 
-  [ "$(add_network ssid=PFT_2590,mode=${SECURT_MODE_WPA_WPA2},password=${SSID_PASSWORD})" = "add_network success" ] &&
-  [ "$(screen_captrue_first_ssid png=${FUNCNAME}_con2.png)" = "screen_captrue_first_ssid success" ] &&
-  [ "$(screen_captrue_last_ssid png=${FUNCNAME}_last.png)" = "screen_captrue_last_ssid success" ] &&
-  echo "${FUNCNAME} [CHECK2]" >> ${OK_FAIL}
+### Test Case ID PFT-2585 Ap with Open+Disable DHCP+Show SSID+have static IP+forget AP
+function PFT_2585_Ap_with_Open_Disable_DHCP_Show_SSID_have_static_IP_forget_AP() {
+  work_tag ${FUNCNAME}
 
-  [ "$(Setting_Default_SSID)" = "Setting_Default_SSID success" ]  &&
-  sleep 15s &&
-  [ "$(screen_captrue_ssid png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  echo "${FUNCNAME} [CHECK3]" >> ${OK_FAIL}
-} 
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false)" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE},enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png=${FUNCNAME}_con.png)" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2586 AP with Open+Disable DHCP+Show SSID+Donot have static IP+forget AP
+function PFT_2586_AP_with_Open_Disable_DHCP_Show_SSID_Donot_have_static_IP_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false)" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid fail" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2587 Ap with OPEN+Enable DHCP+Hide SSID+Manual add+Donot have static IP+Forget AP 
+function PFT_2587_Ap_with_OPEN_Enable_DHCP_Hide_SSID_Manual_add_Donot_have_static_IP_Forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(add_network mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png=${FUNCNAME}_web.png)" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2588 AP with Open+Enable DHCP+Show SSID+Donot have static IP+Auto connect+forget AP
+function PFT_2588_AP_with_Open_Enable_DHCP_Show_SSID_Donot_have_static_IP_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE})" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png=${FUNCNAME}_web.png)" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops switch='on')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2589 Connect AP with 802.11 b and 802.11 g and 802.11 n
+function PFT_2589_Connect_AP_with_802.11_b_and_802.11_g_and_802.11_n() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_B},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_B_con.png)" = "screen_captrue_ssid success" ]
+
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_G},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_G_con.png)" = "screen_captrue_ssid success" ]
+
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_N},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_N_con.png)" = "screen_captrue_ssid success" ]
+
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_BG},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_BG_con.png)" = "screen_captrue_ssid success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2590 Add a AP with WPA/WPA2 PSK manually+Forget AP
+function PFT_2590_Add_a_AP_with_WPA_WPA2_PSK_manually_Forget_AP() {
+  work_tag ${FUNCNAME}
+  manual ${FUNCNAME}
+}
+
+### Test Case ID PFT-2591 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2591_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_TKIP_Donot_have_static_IP_Correct_password+Auto_connect_forget_AP(){
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2592 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+AES+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2592_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_AES_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] && 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2593 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2593_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_TKIP_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}  
+
+### Test Case ID PFT-2594 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+AES+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2594_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_AES_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test case ID PFT-2595 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+Security(Auto select)+encryption(Auto select)+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2595_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_Security_Auto_select_encryption_Auto_select_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops)" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops)" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test case ID PFT-2596 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP/WPA-PSK+AES/WPA2-PSK+TKIP/WPA2-PSK+AES/Security(Auto select)+encryption(Auto select)+Donot have static IP+Incorrect password+Auto connect+forget AP
+function PFT_2596_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_Security_Auto_select_encryption_Auto_select_Donot_have_static_IP_Incorrect_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops)" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid password='87654321')" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2597 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+have static IP+correct password+forget AP
+function PFT_2597_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_TKIP_have_static_IP_correct_password_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2598 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+AES+have static IP+correct password+forget AP
+function PFT_2598_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_AES_have_static_IP_correct_password_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] && sleep 10s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2599 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+have static IP+correct password+forget AP
+function PFT_2599_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_TKIP_have_static_IP_correct_password_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2600 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+have static IP+correct password+forget AP
+function PFT_2600_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_AES_have_static_IP_correct_password_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] && sleep 10s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2601 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+Security(Auto select)+encryption(Auto select)+have static
+function PFT_2601_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_Security_Auto_select_encryption_Auto_select_have_staticIP_correct_password_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops)" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2602 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA-PSK+TKIP+Manual add+Donot have static IP+correct password+Forget AP
+function PFT_2602_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_TKIP_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 5s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2603 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA-PSK+TKIP+Manual add+Donot have static IP+correct password+Forget AP
+function PFT_2603_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_AES_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] && sleep 5s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2604 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA2-PSK+TKIP+Manual add+Donot have static IP+correct password+Forget AP
+function PFT_2604_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_TKIP_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 5s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2605 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA2-PSK+AES+Manual add+Donot have static IP+correct password+Forget AP
+function PFT_2605_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_AES_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] && sleep 5s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2606 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+Security(Auto select)+encryption(Auto select)+Do not have static
+function PFT_2606_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_Do_not_have_staticIP_correct_password_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=false)" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2627 Connect AP with 802.11 b, 802.11 g, 802.11 n
+function PFT_2627_Connect_AP_with_802_11_b_802_11_g_802_11_n() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA_WPA2},channel_width_24g=${CHANNEL_WIDTH_24},network_mode_24g=${NETWORK_MODE_B})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_b_con.png)" = "screen_captrue_ssid success" ]
+
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA_WPA2},channel_width_24g=${CHANNEL_WIDTH_24},network_mode_24g=${NETWORK_MODE_G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_g_con.png)" = "screen_captrue_ssid success" ]
+
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA_WPA2},channel_width_24g=${CHANNEL_WIDTH_24},network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_n_con.png)" = "screen_captrue_ssid success" ]
+  check ${FUNCNAME}
+}
+
+###
+
+
+
+
 
 ######################################################################################
 ###Part 5 :    WEP
