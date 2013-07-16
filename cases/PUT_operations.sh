@@ -16,6 +16,10 @@ function opt_fail() {
   echo "$1 [FIAL]" >> ${OK_FAIL}
 }
 
+function opt_ok() {
+  echo "$1 [OK]" >> ${OK_FAIL}
+}
+
 function cursor_up_rel() {
   local n=$1
   for((i=0; i<$n; i++)); do
@@ -212,7 +216,7 @@ function add_network() {
   local show_advances=false
   local enable_advances=false
   local show_advances_png="${FUNCNAME}_advances.png"
-  local ip_address=${DUT_IP_ADDR}
+  local ip_address=${PUT_IP_ADDR}
 
   [ "${arg}" != "" ] &&
   for i in 1 2 3 4 5 6 7 8 9 10 11; do 
@@ -403,7 +407,7 @@ function connect_first_ssid() {
   local show_advances="false"
   local show_advances_png="${FUNCNAME}_advances.png"
   local enable_advances="false"
-  local ip_address="${DUT_IP_ADDR}"
+  local ip_address="${PUT_IP_ADDR}"
 
   [ "${arg}" != "" ] &&
   for i in 1 2 3 4 5 6 7 8; do 
@@ -612,52 +616,31 @@ function browser_ops() {
   [ "$(adb_screencap png=${png})" = "adb_screencap success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
 }
 
+function airplane_ops() {
+  local allow=$1
+  [ "${allow}" != "false" ] && [ "${allow}" != "true" ] && "echo ${FUNCNAME} fail" && return
 
-#################################################################################
-##
-#################################################################################
-function enable_airplane() {
   local select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`
   local tag=`echo ${select} | grep "airplane_mode_on" | awk -F "|" '{ print substr($3,1,1) }'`
 
-  if [ "${tag}" != "1" ]; then
-    cursor_back_home 
-    adb -s ${DEVICES_MASTER} shell am start -a android.settings.AIRPLANE_MODE_SETTINGS > /dev/null
-    reset_cursor_to_top
-    cursor_down
-    cursor_click 
-    select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`
-    tag=`echo ${select} | grep "airplane_mode_on" | awk -F "|" '{ print substr($3,1,1) }'`
+  if [ "${allow}" = "true" ]; then
+    [ "${tag}" = "1" ] && echo "${FUNCNAME} success" && return
+  elif [ "${allow}" = "false" ]; then
+    [ "${tag}" != "1" ] && echo "${FUNCNAME} success" && return
   fi
+ 
+  cursor_back_home 
+  adb -s ${DEVICES_MASTER} shell am start -a android.settings.AIRPLANE_MODE_SETTINGS > /dev/null
+  cursor_go 1
+  cursor_click
 
-  if [ "${tag}" = "1" ] ; then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
-  fi
-}
+  select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`
+  tag=`echo ${select} | grep "airplane_mode_on" | awk -F "|" '{ print substr($3,1,1) }'`
 
-#################################################################################
-##
-#################################################################################
-function disable_airplane() {
-  local select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`
-  local tag=`echo ${select} | grep "airplane_mode_on" | awk -F "|" '{ print substr($3,1,1) }'`
-
-  if [ "${tag}" = "1" ]; then
-    cursor_back_home 
-    adb -s ${DEVICES_MASTER} shell am start -a android.settings.AIRPLANE_MODE_SETTINGS > /dev/null
-    reset_cursor_to_top
-    cursor_down
-    cursor_click 
-    select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`
-    tag=`echo ${select} | grep "airplane_mode_on" | awk -F "|" '{ print substr($3,1,1) }'`
-  fi
-
-  if [ "${tag}" = "0" ] || [ "${tag}" = "" ] ; then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
+  if [ "${allow}" = "true" ]; then
+    [ "${tag}" = "1" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+  elif [ "${allow}" = "false" ]; then
+    [ "${tag}" != "1" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   fi
 }
 
@@ -762,14 +745,13 @@ function screen_captrue_ssid_ops() {
   done
 
   [ "$(open_wifi)" = "open_wifi fail" ] && echo "${FUNCNAME} fail" && return
-  
+  sleep 3s
+ 
   if [ "${locate}" = "first" ]; then
-    [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && echo "${FUNCNAME} fail" && return
-    reset_cursor_to_top
-    cursor_down
+    cursor_go 1
     cursor_click
   elif [ "${locate}" = "head" ]; then
-    reset_cursor_to_top
+    cursor_go 0
   elif [ "${locate}" = "tail" ]; then
     reset_cursor_to_bottom_20
   elif [ "${locate}" = "last" ]; then
@@ -834,7 +816,7 @@ function adb_push() {
 }
 
 function pc_iperf_c() {
-  iperf -c ${DUT_IP_ADDR} -t 180 > /dev/null
+  iperf -c ${PUT_IP_ADDR} -t 30 > /dev/null
   [ "$?" = "0" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
 }
 
@@ -845,7 +827,7 @@ function pc_iperf_s() {
 
 function dut_iperf_c() {
   local tag=$1
-  local arr_rate_Mbit=(`adb shell iperf -c ${PC_IP_ADDR} -i 10 -t 180 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
+  local arr_rate_Mbit=(`adb shell iperf -c ${PC_IP_ADDR} -i 10 -t 30 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
   [ "${arr_rate_Mbit[*]}" = "" ] && echo "$FUNCNAME fail" && return
   local len=${#arr_rate_Mbit[*]}
   local sum=0
@@ -893,5 +875,116 @@ function dut_kill_9_iperf_s() {
   for pid in ${pids[*]}; do
     adb shell kill -9 ${pid} > /dev/null
   done
+}
+
+function DUT_Upload_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops)" = "clean_wifi_ops fail" ] && return
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_BG})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network enable_advances=true)" = "add_network success" ] &&
+  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s && 
+  [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
+  [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && 
+  echo "$FUNCNAME success"
+  pc_kill_9_iperf_s
+}
+
+function DUT_Download_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops)" = "clean_wifi_ops fail" ] && return
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_BG})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network enable_advances=true)" = "add_network fail" ] && return
+  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s && 
+  { 
+    sleep 5s
+    [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s 
+  }&
+
+  [ "$(dut_iperf_s $FUNCNAME)" = "dut_iperf_c success" ]  
+  echo "$FUNCNAME success"
+}
+
+function DUT_Upload_Data_Throughput_Network_80211A_RSSI_50_to_70() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops)" = "clean_wifi_ops fail" ] && return
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_A})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network enable_advances=true)" = "add_network success" ] &&
+  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s && 
+  [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
+  [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && 
+  echo "$FUNCNAME success"
+  pc_kill_9_iperf_s
+}
+
+function DUT_Download_Data_Throughput_Network_80211A_RSSI_50_to_70() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops)" = "clean_wifi_ops fail" ] && return
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_A})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network enable_advances=true)" = "add_network fail" ] && return
+  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s && 
+  { 
+    sleep 5s
+    [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s 
+  }&
+
+  [ "$(dut_iperf_s $FUNCNAME)" = "dut_iperf_c success" ]  
+  echo "$FUNCNAME success"
+}
+
+function DUT_Upload_Data_Throughput_Network_80211N_RSSI_50_to_70() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops)" = "clean_wifi_ops fail" ] && return
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network enable_advances=true)" = "add_network success" ] &&
+  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s && 
+  [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
+  [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && 
+  echo "$FUNCNAME success"
+  pc_kill_9_iperf_s
+}
+
+function DUT_Download_Data_Throughput_Network_80211N_RSSI_50_to_70() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops)" = "clean_wifi_ops fail" ] && return
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network enable_advances=true)" = "add_network fail" ] && return
+  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s && 
+  { 
+    sleep 5s
+    [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s 
+  }&
+
+  [ "$(dut_iperf_s $FUNCNAME)" = "dut_iperf_c success" ]  
+  echo "$FUNCNAME success"
 }
 

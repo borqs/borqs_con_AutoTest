@@ -65,7 +65,7 @@ function Basic_Wireless_Settings() {
       channel_24g=${value}
       ;;
     "passphrase_24g")
-      channel_24g=${value}
+      passphrase_24g=${value}
       ;;
     "ssid_broadcast_24g")
       ssid_broadcast_24g=${value}
@@ -321,7 +321,7 @@ function set_ap_ops() {
 
   sleep 3s
 
-  if [ "$(Wireless_Security security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g})" = "Setting_Default_SSID fail" ]; then
+  if [ "$(Wireless_Security security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g})" = "Wireless_Security fail" ]; then
     echo "${FUNCNAME} fail"  &&  opt_fail ${func} && return
   fi
 
