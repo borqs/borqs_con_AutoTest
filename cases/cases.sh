@@ -3,38 +3,66 @@
 ######################################################################################
 ###Here are the Global Variable Parameters
 ######################################################################################
-#export DEVICES_MASTER="45010053454d30384790061f1a2230ab"
+#You may modify these value for different PUT
+#-------------------------------------------------------------------------------------
 export DEVICES_MASTER="45010053454d30384790061f1a2230ab"
 export DEVICES_SLAVE=""
+export WIRELESS_NETWORK_WIFI_X_Y="300 190"
+export ADD_NETWORK_X_Y="435 765"
+
+##For AP
+#--------------------------------------------------------------------------------------
+export NETWORK_MODE_DISABLE="disabled"
+export NETWORK_MODE_A="a-only"
+export NETWORK_MODE_MIXED="mixed"
+export NETWORK_MODE_B="b-only"
+export NETWORK_MODE_G="g-only"
+export NETWORK_MODE_BG="bg-mixed"
+export NETWORK_MODE_N="n-only"
 export SSID="wlan_autotest"
 export SSID_5G="wlan_autotest_5G"
+export NETWORK_CHANNEL_WIDTH_AUTO="0"
+export NETWORK_CHANNEL_WIDTH_20="20"
+export NETWORK_CHANNEL_AUTO="0"
+export NETWORK_CHANNEL_1="1"
+export NETWORK_CHANNEL_6="6"
+export NETWORK_CHANNEL_11="11"
+export SSID_BROADCAST_ENABLE="0"
+export SSID_BROADCAST_DISENABLE="1"
+#--------------------------------------------------------------------------------------
 export BSSID="58:6d:8f:85:cf:56"
+export SECURT_MODE_WPA_WPA2="wpa2_personal"
+export SECURT_MODE_WPA_PERSONAL="wpa_personal"
+export SECURT_MODE_WPA2_PERSONAL="wpa2_personal"
+export SECURT_MODE_ENTERPRISE_MIXED_MODE="wpa2_enterprise"
+export SECURT_MODE_WPA_ENTERPRISE="wpa_enterprise"
+export SECURT_MODE_WPA2_ENTERPRISE="wpa2_enterprise"
+export SECURT_MODE_WEP="wep"
+export SECURT_MODE_RADIUS="radius"
+export SECURT_MODE_DISABLE="disabled"
+export CRYPT_24G_MIXED="tkip%2Baes"
+export CRYPT_24G_TKIP="tkip"
+export CRYPT_24G_AES="aes"
 export SSID_PASSWORD="12345678"
 export SSID_PASSWORD_WEP="1234567890"
-export SECURT_MODE_WPA=""
-export SECURT_MODE_WPA2=""
-export SECURT_MODE_WPA_WPA2="wpa2_personal"
-export SECURT_MODE_WEP="wep"
-export SECURT_MODE_NONE="none"
-export NETWORK_MODE_A=""
-export NETWORK_MODE_B=""
-export NETWORK_MODE_G=""
-export NETWORK_MODE_BG="mixed"
-export NETWORK_MODE_N=""
-export NETWORK_MODE_BGN=""
-export WPA_ENCRPPT_AES="aes"
-export WPA_ENCRPPT_TKIP="tkip"
+#--------------------------------------------------------------------------------------
+export DHCP_SERVER_DISABLE="static"
+export DHCP_SERVER_ENABLE="dhcp"
+
 export AP_IP_ADDR="192.168.1.1"
 export PC_IP_ADDR="192.168.1.222"
-export DUT_IP_ADDR="192.168.1.111"
+export PUT_IP_ADDR="192.168.1.111"
 export WEB_INDEX="http://192.168.1.222/index.html"
 export WEB_DOWNLOAD_MP3="http://192.168.1.222/test/Beijing_Beijing.mp3"
-export DUT_DOWNLOAD_DIR="/data"
+export PUT_DOWNLOAD_DIR="/data"
 export PC_DOWNLOAD_DIR="$(pwd)/results/download"
 export PNG="$(pwd)/results/png"
-export WPA_SUPPLICANT_CONF="$(pwd)/prepared/wpa_supplicant.conf"
-export CURL="$(pwd)/prepared/bin/curl"
-export IPERF="$(pwd)/prepared/bin/iperf_arm"
+export PC_WPA_SUPPLICANT_CONF="$(pwd)/prepared/wpa_supplicant.conf"
+export PUT_WPA_SUPPLICANT_CONF="/data/misc/wifi/wpa_supplicant.conf"
+export PC_CURL="$(pwd)/prepared/bin/curl"
+export PUT_CURL="/system/bin/curl"
+export PC_IPERF="$(pwd)/prepared/bin/iperf_arm"
+export PUT_IPERF="/system/bin/iperf_arm"
 export OK_FAIL="$(pwd)/results/OK_FAIL.txt"
 export DATA_THROUGHPUT="$(pwd)/results/RT.txt"
 export CASE_INFO="$(pwd)/results/cases_info"
@@ -44,17 +72,17 @@ export CASE_INFO="$(pwd)/results/cases_info"
 ###tp_link_settings.sh :     do settings in AP part
 ###verifications.sh    :     check results (screen capture, wpa_cli)
 ######################################################################################
-source $(pwd)/cases/dut_operations.sh
-source $(pwd)/cases/tp_link_settings.sh
+source $(pwd)/cases/PUT_operations.sh
+source $(pwd)/cases/router_settings.sh
 source $(pwd)/cases/verifications.sh
 
 #####################################################################################
 ###Clean last test results
 ######################################################################################
-[ -e ${OK_FAIL} ] && rm ${OK_FAIL} && echo "${OK_FAIL} clean"
-[ -e ${PC_DOWNLOAD_DIR}/* ] && rm -rf ${PC_DOWNLOAD_DIR}/* && echo "${PC_DOWNLOAD_DIR}/* clean"
-[ -e ${PNG}/* ] && rm -rf ${PNG}/* && echo "${PNG}/* clean"
-[ -e ${CASE_INFO}/* ] && rm -rf ${CASE_INFO}/* && echo "${CASE_INFO}/* clean"
+#[ -e ${OK_FAIL} ] && rm ${OK_FAIL} && echo "${OK_FAIL} clean"
+#[ -e ${PC_DOWNLOAD_DIR}/* ] && rm -rf ${PC_DOWNLOAD_DIR}/* && echo "${PC_DOWNLOAD_DIR}/* clean"
+#[ -e ${PNG}/* ] && rm -rf ${PNG}/* && echo "${PNG}/* clean"
+#[ -e ${CASE_INFO}/* ] && rm -rf ${CASE_INFO}/* && echo "${CASE_INFO}/* clean"
 
 ######################################################################################
 ###Here are the cases, which could be set enable or disable in config.txt file
@@ -76,7 +104,7 @@ function PFT_2511_Browser_internet_via_connect_wifi() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
     
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] &&
-  [ "$(browser_load_web http=${NEW_BAIDU},png=${FUNCNAME}.png)" = "browser_load_web success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops success" ] &&
   check ${FUNCNAME} 
 }
 
@@ -147,9 +175,9 @@ function PFT_2516_Connect_to_AP_with_static_IP_when_have_static_IP_on_DUT() {
  
   [ "$(set_ap_ops func=${FUNCNAME},dhcp=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(add_network ip=${DUT_IP_ADDR})" = "add_network success" ] && sleep 10s
+  [ "$(add_network ip=${PUT_IP_ADDR})" = "add_network success" ] && sleep 10s
   [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
-  [ "$(browser_load_web http=${NEW_BAIDU},png=${FUNCNAME}.png)" = "browser_load_web success" ] &&
+  [ "$(browser_load_web http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_load_web success" ] &&
   check ${FUNCNAME}
 }
 
@@ -870,7 +898,7 @@ function PFT_2580_Modify_AP_with_static_IP_proxy_settings_OPEN_manually() {
 }
 
 ### Test Case ID PFT-2581 Modify AP with proxy settings + OPEN manually
-function PFT_2581_Modify_AP_with_proxy_settings_OPEN _manually() {
+function PFT_2581_Modify_AP_with_proxy_settings_OPEN_manually() {
   work_tag ${FUNCNAME}
   manual ${FUNCNAME}
 }

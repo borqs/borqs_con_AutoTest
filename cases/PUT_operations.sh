@@ -1,8 +1,21 @@
 #!/bin/bash
 
-################################################################################
-##operations for cursor
-################################################################################
+function work_tag() {
+  echo " " >> ${OK_FAIL} && echo "$1 ..." >> ${OK_FAIL}
+}
+
+function check() {
+  echo "$1 [CHECK]" >> ${OK_FAIL}
+}
+
+function manual() {
+  echo "$1 [MANUAL]" >> ${OK_FAIL}
+}
+
+function opt_fail() {
+  echo "$1 [FIAL]" >> ${OK_FAIL}
+}
+
 function cursor_up_rel() {
   local n=$1
   for((i=0; i<$n; i++)); do
@@ -56,6 +69,10 @@ function reset_cursor_to_bottom_20() {
 }
 
 function cursor_back_home() {
+  adb -s ${DEVICES_MASTER} shell input keyevent 4
+  adb -s ${DEVICES_MASTER} shell input keyevent 4
+  adb -s ${DEVICES_MASTER} shell input keyevent 4
+  sleep 1s
   adb -s ${DEVICES_MASTER} shell input keyevent 3
 }
 
@@ -86,7 +103,11 @@ function cursor_left() {
 function cursor_menu() {
   adb -s ${DEVICES_MASTER} shell input keyevent 82
 }
- 
+
+function input_text() {
+  adb -s ${DEVICES_MASTER} shell input text "$1"
+}
+   
 #################################################################################
 ##basic operations: open wifi, close wifi.
 #################################################################################
@@ -103,7 +124,7 @@ function open_wifi() {
   fi
 
 #open wifi
-  reset_cursor_to_top
+  cursor_go 0
   cursor_click
   sleep 3s
  
@@ -115,13 +136,14 @@ function open_wifi() {
   fi
 }
 
+
 ##Open WiFi from WIRELESS & NETWORKS interface
 function open_wifi_directly() {
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
   
   for i in 1 2 3 ; do
-    adb -s ${DEVICES_MASTER} shell input touchscreen tap 300 190
+    adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
     sleep 2s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] &&
     echo "$FUNCNAME success"&& cursor_click && return
@@ -156,7 +178,7 @@ function close_wifi_directly() {
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
   
   for i in 1 2 3 ; do
-    adb -s ${DEVICES_MASTER} shell input touchscreen tap 300 190
+    adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
     sleep 2s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ] &&
     echo "$FUNCNAME success" && cursor_click && return
@@ -165,28 +187,35 @@ function close_wifi_directly() {
   echo "$FUNCNAME fail"
 }
 
+function reopen_wifi() {
+#from home start settings
+  if [ "$(close_wifi)" = "close_wifi success" ] && [ "$(open_wifi)" = "open_wifi success" ]; then
+    echo "$FUNCNAME success"
+  else
+    echo "$FUNCNAME fail"
+  fi
+}
+
 #####################################################################################
 ##basic operations: add network, connect first ssid in list, manual scan
 ##                  forget connected ssid.
 ##################################################################################### 
-#secType None          ->   0
-#secType WEP           ->   1
-#secType WPA/WPA2 PSK  ->   2
-#secType 802.x EAP     ->   3
 function add_network() {
   local arg=$1
   local ssid=${SSID}
   local mode=${SECURT_MODE_WPA_WPA2}
+  local show_mode=false
+  local show_mode_png="${FUNCNAME}_mode.png"
   local password=${SSID_PASSWORD}
   local show_password=false
-  local password_png="${FUNCNAME}_password.png"
+  local show_password_png="${FUNCNAME}_password.png"
   local show_advances=false
   local enable_advances=false
-  local advances_png="${FUNCNAME}_advances.png"
+  local show_advances_png="${FUNCNAME}_advances.png"
   local ip_address=${DUT_IP_ADDR}
 
   [ "${arg}" != "" ] &&
-  for i in 1 2 3 4 5 6 7 8 9; do 
+  for i in 1 2 3 4 5 6 7 8 9 10 11; do 
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
     case $var in  
@@ -196,14 +225,20 @@ function add_network() {
     "mode")
       mode=${value}
       ;;  
+    "show_mode")
+      show_mode=${value}
+      ;;
+    "show_mode_png")
+      show_mode_png=${value}
+      ;;
     "password")
       password=${value}
       ;;
     "show_password")
       show_password=${value}
       ;;
-    "password_png")
-      password_png=${value}
+    "show_password_png")
+      show_password_png=${value}
       ;;
     "show_advances")
       show_advances=${value}
@@ -211,118 +246,108 @@ function add_network() {
     "enable_advances")
       enable_advances=${value}
       ;;
-    "advances_png")
-      advances_png=${value}
+    "show_advances_png")
+      show_advances_png=${value}
       ;;
-    "ip_address")
-      ip_address=${value}
+    "put_ip_address")
+      put_ip_address=${value}
       ;;
     esac
   done
+  sleep 1s
 
 #open add network
-  cursor_back
   if [ "$(open_wifi)" = "open_wifi fail" ] ; then
     echo "${FUNCNAME} fail"
     return
   fi
 #add network
-  adb -s ${DEVICES_MASTER} shell input touchscreen tap 435 765 
+  adb -s ${DEVICES_MASTER} shell input touchscreen tap ${ADD_NETWORK_X_Y} 
   sleep 1s
 #input ssid
-  reset_cursor_to_top
-  adb -s ${DEVICES_MASTER} shell input text ${ssid}
-  cursor_down 
+  cursor_go 0
+  input_text ${ssid}
+  cursor_down
+  sleep 1s 
 #mode
   cursor_click
-  reset_cursor_to_top
+  cursor_go 0
+  sleep 1s
+
   if [ "${mode}" = "${SECURT_MODE_NONE}" ]; then
   #select none
-    cursor_click
-  
-  
-    if [ "${show_password}" = "true" ]; then
-      cursor_click
-      [ "$(adb_screencap png=${password_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
+    cursor_down_rel 0
+    if [ "${show_mode}" = "true" ]; then
+      [ "$(adb_screencap png=${show_mode_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
     fi
-
+    cursor_click
   elif [ "${mode}" = "${SECURT_MODE_WEP}" ]; then
-    cursor_down
-    cursor_click
-
-    cursor_down
-
-  #password
-    adb -s ${DEVICES_MASTER} shell input text ${password}
-    cursor_down
-
-  #show password and do screen captrue
-    if [ "${show_password}" = "true" ]; then
-      cursor_click
-      [ "$(adb_screencap png=${password_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
+    cursor_down_rel 1
+    if [ "${show_mode}" = "true" ]; then
+      [ "$(adb_screencap png=${show_mode_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
     fi
-
+    cursor_click
+    cursor_down
+    input_text ${password}
   elif [ "${mode}" = "${SECURT_MODE_WPA_WPA2}" ]; then
-  #select wpa2
-    cursor_down
-    cursor_down
+    cursor_down_rel 2
+    if [ "${show_mode}" = "true" ]; then
+      [ "$(adb_screencap png=${show_mode_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
+    fi
     cursor_click
-    
     cursor_down
+    input_text ${password}
+  elif [ "${mode}" = "${SECURT_MODE_ENTERPRISE_MIXED_MODE}" ]; then
+    cursor_down_rel 3
+    if [ "${show_mode}" = "true" ]; then
+      [ "$(adb_screencap png=${show_mode_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
+    fi
+    cursor_click
+    ##Do for EAP#
+  fi
+    sleep 1s
 
-  #password
-    adb -s ${DEVICES_MASTER} shell input text ${password}
+#show password and do screen captrue
+  if [ "${mode}" != "${SECURT_MODE_NONE}" ]; then
     cursor_down
-
-  #show password and do screen captrue
     if [ "${show_password}" = "true" ]; then
       cursor_click
-      [ "$(adb_screencap png=${password_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
+      [ "$(adb_screencap png=${show_password_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
     fi
-
-  else
-    echo "$FUNCNAME fail" && return
   fi
-
+#Steps for advaces
+  cursor_down
   if [ "${enable_advances}" = "true" ]; then
   #show advaces
-    cursor_down
     cursor_click
-
   #Static IP
     cursor_down
     cursor_down
-
     if [ "${show_advances}" = "true" ]; then
-      [ "$(adb_screencap png=${advances_png})" = "adb_screencap fail" ] && echo "${FUNCNAME} fail" && return
+      [ "$(adb_screencap png=${show_advances_png})" = "adb_screencap fail" ] && echo "${FUNCNAME} fail" && return
     fi
-
     cursor_click
-    cursor_up
+    cursor_go 1
     cursor_down
     cursor_click
+    cursor_down
     sleep 1s
- 
   #IP ADDR
-    cursor_down
-    adb -s ${DEVICES_MASTER} shell input text ${ip_address}
-
+    input_text ${ip_address}
+    sleep 1s
   ##Gateway
     cursor_down
     sleep 1s
-
   #Network length
     cursor_down
     sleep 1s
-
   #DNS1
     cursor_down
     sleep 1s
-
   #DNS2
     cursor_down
     adb -s ${DEVICES_MASTER} shell input text "8.8.4.4"
-   fi
+  fi
 
   reset_cursor_to_bottom
   cursor_right
@@ -333,6 +358,9 @@ function add_network() {
   echo "${FUNCNAME} success"
 }
 
+#add_network show_mode=true,show_mode_png=1.png,show_password=true,show_password=true,show_password_png=2.png,enable_advances=true
+#add_network mode=${SECURT_MODE_WEP},password="1234567890",show_mode=true,show_mode_png=1.png,show_password=true,show_password=true,show_password_png=2.png,enable_advances=true
+#add_network mode=${SECURT_MODE_NONE},show_mode=true,show_mode_png=2.png,enable_advances=true
 #########################################################################################
 function scan_manual() {
   if [ "$(open_wifi)" = "open_wifi fail" ]; then
@@ -368,27 +396,31 @@ function enable_wps_pin() {
 #########################################################################################
 function connect_first_ssid() {
   local arg=$1
+  local mode=${SECURT_MODE_WPA_WPA2}
   local password=${SSID_PASSWORD}
   local show_password="false"
   local password_png="${FUNCNAME}_password.png"
   local show_advances="false"
-  local advances_png="${FUNCNAME}_advances.png"
+  local show_advances_png="${FUNCNAME}_advances.png"
   local enable_advances="false"
   local ip_address="${DUT_IP_ADDR}"
 
   [ "${arg}" != "" ] &&
-  for i in 1 2 3 4 5 6 7; do 
+  for i in 1 2 3 4 5 6 7 8; do 
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
     case $var in 
+    "mode")
+      mode=${value}
+      ;; 
     "password")
       password=${value}
       ;; 
     "show_password")
       show_password=${value}
       ;;  
-    "password_png")
-      password_png=${value}
+    "show_password_png")
+      show_password_png=${value}
       ;;
     "show_advances")
       show_advances=${value}
@@ -396,8 +428,8 @@ function connect_first_ssid() {
     "enable_advances")
       enable_advances=${value}
       ;;
-    "advances_png")
-      advances_png=${value}
+    "show_advances_png")
+      show_advances_png=${value}
       ;;
     "ip_address")
       ip_address=${value}
@@ -405,7 +437,7 @@ function connect_first_ssid() {
     esac
   done
 
-#If had been connected, it just forget it !
+#If had been connected, just forget it !
   if [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ]; then
     [ "$(forget_first_ssid)" = "forget_first_ssid fail" ] && echo "${FUNCNAME} fail" && return
   fi
@@ -418,60 +450,71 @@ function connect_first_ssid() {
   fi
  
 #click first SSID
-  reset_cursor_to_top
-  cursor_down
-  cursor_click
+  cursor_go 1
   sleep 1s
-
-#input password
-  adb -s ${DEVICES_MASTER} shell input text ${password}
+  if [ "${mode}" = "${SECURT_MODE_NONE}" ]; then
+  #select none
+    cursor_click
+  elif [ "${mode}" = "${SECURT_MODE_WEP}" ]; then
+    cursor_click
+    input_text ${password}
+  elif [ "${mode}" = "${SECURT_MODE_WPA_WPA2}" ]; then
+    cursor_click
+    input_text ${password}
+  elif [ "${mode}" = "${SECURT_MODE_ENTERPRISE_MIXED_MODE}" ]; then
+    cursor_click
+    ##Do for EAP#
+  fi
   sleep 1s
-
-  cursor_down
 
 #show password and do screen captrue
-  if [ "${show_password}" = "true" ]; then
-    cursor_click
-    [ "$(adb_screencap png=${password_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
+  if [ "${mode}" != "${SECURT_MODE_NONE}" ]; then
+    cursor_down
+    if [ "${show_password}" = "true" ]; then
+      cursor_click
+      [ "$(adb_screencap png=${show_password_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
+    fi
+    cursor_down
   fi
-
+#Steps for advaces
   if [ "${enable_advances}" = "true" ]; then
   #show advaces
-    cursor_down
     cursor_click
-    
-    if [ "${show_advances}" = "true" ]; then
-      [ "$(adb_screencap png=${advances_png})" = "adb_screencap fail" ] && echo "${FUNCNAME} fail" && return
-    fi
-
   #Static IP
     cursor_down
     cursor_down
-
+    if [ "${show_advances}" = "true" ]; then
+      [ "$(adb_screencap png=${show_advances_png})" = "adb_screencap fail" ] && echo "${FUNCNAME} fail" && return
+    fi
     cursor_click
-    cursor_up
+    cursor_go 1
     cursor_down
     cursor_click
-   
+    cursor_down
+    sleep 1s
   #IP ADDR
-    adb -s ${DEVICES_MASTER} shell input text ${ip_address}
-
+    input_text ${ip_address}
+    sleep 1s
   ##Gateway
     cursor_down
-
+    sleep 1s
   #Network length
     cursor_down
-
+    sleep 1s
   #DNS1
     cursor_down
-
+    sleep 1s
   #DNS2
+    cursor_down
     adb -s ${DEVICES_MASTER} shell input text "8.8.4.4"
-   fi
+  fi
 
-#do connect
-  reset_cursor_to_bottom 
-  cursor_click
+  if [ "${mode}" != "${SECURT_MODE_NONE}" ]; then
+    reset_cursor_to_bottom
+    cursor_right
+    cursor_click
+  fi
+
   sleep 15s
 
 #check results
@@ -482,44 +525,33 @@ function connect_first_ssid() {
   fi
 }
 
+#connect_first_ssid mode=${SECURT_MODE_WEP},password="1234567890",show_password=true,show_password_png=1.png,enable_advances=true,show_advances=true,show_advances_png=2.png
+#connect_first_ssid mode=${SECURT_MODE_NONE}
 ###########################################################################################
 ##
 ###########################################################################################
 function forget_first_ssid() {
-  if [ "$(adb_ping)" = "adb_ping fail" ]; then
-    echo "$FUNCNAME success"
-    return
+  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
+    echo "${FUNCNAME} fail" && return
   fi
-
-#come to wifi setting, touch first ssid, forget
-  if [ "$(open_wifi)" = "open_wifi success" ]; then
-    reset_cursor_to_top
-    cursor_down
-    cursor_click
-    reset_cursor_to_bottom
-    cursor_click
+  sleep 3s
+  if [ "$(reopen_wifi)" = "reopen_wifi success" ]; then
     sleep 3s
-  fi
-
-  if [ "$(adb_ping)" = "adb_ping fail" ]; then
-    echo "$FUNCNAME success"
+    [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 }
 
 ####################################################################################
 ##clean wifi operations:
 ####################################################################################
-function clean_wifi_operations() {
+function clean_wifi_ops() {
+  local tag=$1
 #forget 
-  cursor_back 
-  if [ "$(adb_ping)" = "adb_ping success" ] ; then
-    [ "$(forget_first_ssid)" = "forget_first_ssid fail" ] &&
-    [ "$(forget_first_ssid)" = "forget_first_ssid fail" ] &&
-    [ "$(forget_first_ssid)" = "forget_first_ssid fail" ] &&
-    echo "$FUNCNAME fail" &&
-    return
+  cursor_back_home
+  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
+    echo "${FUNCNAME} fail" && opt_fail ${tag} && return
   fi
 
 #close
@@ -527,8 +559,7 @@ function clean_wifi_operations() {
     [ "$(close_wifi)" = "close_wifi fail" ] &&
     [ "$(close_wifi)" = "close_wifi fail" ] &&
     [ "$(close_wifi)" = "close_wifi fail" ] &&
-    echo "$FUNCNAME fail" &&
-    return
+    echo "$FUNCNAME fail" && opt_fail ${arg} && return
   fi
 
 #back home
@@ -540,7 +571,7 @@ function clean_wifi_operations() {
 ####################################################################################
 ##eg: browser_load_web 
 #####################################################################################
-function browser_load_web() {
+function browser_ops() {
   local arg=$1
   local http=${WEB_INDEX}
   local png=${FUNCNAME}.png
@@ -565,10 +596,10 @@ function browser_load_web() {
 
 #download data
   if [ "${name}" != "" ]; then
-    [ "(adb_push src=${PC_CURL},des=${DUT_CURL})" = "adb_push fail" ] && echo "${FUNCNAME} fail" && return
-    adb -s ${DEVICES_MASTER} shell curl -o ${DUT_DOWNLOAD_DIR}/${name} ${http} > /dev/null
+    [ "$(adb_push src=${PC_CURL},des=${PUT_CURL})" = "adb_push fail" ] && echo "${FUNCNAME} fail" && return
+    adb -s ${DEVICES_MASTER} shell curl -o ${PUT_DOWNLOAD_DIR}/${name} ${http} > /dev/null
     sleep 3s
-    adb -s ${DEVICES_MASTER} pull ${DUT_DOWNLOAD_DIR}/${name} ${PC_DOWNLOAD_DIR}/${name} > /dev/null
+    adb -s ${DEVICES_MASTER} pull ${PUT_DOWNLOAD_DIR}/${name} ${PC_DOWNLOAD_DIR}/${name} > /dev/null
     [ -e "${PC_DOWNLOAD_DIR}/${name}" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
     return
   fi
@@ -581,29 +612,6 @@ function browser_load_web() {
   [ "$(adb_screencap png=${png})" = "adb_screencap success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
 }
 
-function reload_wpa_supplicant_conf() {
-  local wpa_conf=${WPA_SUPPLICANT_CONF}
-  local arg=$1
- 
-  if [ ${arg} != "" ]; then
-    wpa_conf=`echo ${arg} | grep "wpa_conf=" | awk -F "=" '{ print $2 }'`
-  fi  
- 
-  adb -s ${DEVICES_MASTER} remount > /dev/null
-  adb -s ${DEVICES_MASTER} root > /dev/null
-  adb -s ${DEVICES_MASTER} shell rm /data/misc/wifi/wpa_supplicant.conf > /dev/null
-  local ver=`adb -s ${DEVICES_MASTER} shell ls /data/misc/wifi/wpa_supplicant.conf | grep "No such file or directory"`
-  [ "${ver}" = "" ] && echo "$FUNCNAME fail" && return 
- 
-  adb -s ${DEVICES_MASTER} push ${wpa_conf} /data/misc/wifi/wpa_supplicant.conf > /dev/null
-  sleep 2s
-  ver=`adb -s ${DEVICES_MASTER} shell ls /data/misc/wifi/wpa_supplicant.conf | grep "No such file or directory"`
-  if [ "${ver}" = "" ]; then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
-  fi
-}
 
 #################################################################################
 ##
@@ -678,11 +686,12 @@ function master_clear() {
 ##################################################################################
 ##
 ##################################################################################
-function screen_captrue_advances() {
+function wifi_advances_ops() {
   local arg=$1
-  local ip_mac=false
-  local freq_band=false
-  local set_freq_band=""
+  local show_ip_mac=false
+  local enable_freq_band=false
+  local set_freq_band="auto"
+  local show_freq_band="auto"
   local png=${FUNCNAME}.png
 
   [ "${arg}" != "" ] &&
@@ -690,17 +699,20 @@ function screen_captrue_advances() {
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
     case $var in  
-    "ip_mac")
-      ip_mac=${value}
+    "show_ip_mac")
+      show_ip_mac=${value}
       ;;  
-    "freq_band")
-      freq_band=${value}
-      ;;
-    "png")
-      png=${value}
+    "enable_freq_band")
+      enable_freq_band=${value}
       ;;
     "set_freq_band")
       set_freq_band=${value}
+      ;;
+    "show_freq_band")
+      show_freq_band=${value}
+      ;;
+    "png")
+      png=${value}
       ;;
     esac
   done
@@ -709,29 +721,28 @@ function screen_captrue_advances() {
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.WIFI_IP_SETTINGS > /dev/null
   sleep 3s
 
-  reset_cursor_to_top
-
-  if [ "${ip_mac}" = "true" ]; then
-    reset_cursor_to_bottom
-  elif [ "${freq_band}" = "true" ]; then
+  if [ "${show_ip_mac}" = "true" ]; then
+    cursor_go 7
+  elif [ "${enable_freq_band}" = "true" ]; then
     cursor_go 4
     cursor_click
-    [ "${set_freq_band}" = "24g" ] && cursor_go 3
-    [ "${set_freq_band}" = "5g" ] && cursor_go 2
+    [ "${set_freq_band}" = "24g" ] && cursor_go 2 && cursor_click && sleep 1s
+    [ "${set_freq_band}" = "5g" ] && cursor_go 1 && cursor_click && sleep 1s
+    [ "${set_freq_band}" = "auto" ] && cursor_go 0 && cursor_click && sleep 1s
+    [ "${show_freq_band}" = "true" ] && cursor_click && sleep 1s
   fi
 
-  if [ "$(adb_screencap ${png})" = "adb_screencap success" ] ;then
+  if [ "$(adb_screencap png=${png})" = "adb_screencap success" ] ;then
     echo "${FUNCNAME} success"
   else 
     echo "${FUNCNAME} fail"
   fi
 
 #Be sure that there is not any dialog show before quit
-  cursor_back
-  cursor_back
+  cursor_back_home
 }
 
-function screen_captrue_ssid() {
+function screen_captrue_ssid_ops() {
   local arg=$1
   local png="${FUNCNAME}.png"
   local locate="head"
@@ -762,18 +773,23 @@ function screen_captrue_ssid() {
   elif [ "${locate}" = "tail" ]; then
     reset_cursor_to_bottom_20
   elif [ "${locate}" = "last" ]; then
+##When ap in list more than one screen, It a BUG !!!
     reset_cursor_to_bottom_20
     cursor_up
     cursor_click
   fi
-
   sleep 3s
 
-  [ "$(adb_screencap ${png})" = "adb_screencap success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+  [ "$(adb_screencap png=${png})" = "adb_screencap success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
 
-# Maybe you have reset_cursor_to_bottom_20, reset_cursor_to_top would accurate that your cursor stay head 
-  reset_cursor_to_top_20
-  cursor_back
+# Maybe you have reset_cursor_to_bottom_20, reset_cursor_to_top would accurate that your cursor stay head
+  if [ "${locate}" = "last" ]; then
+    cursor_back
+    reset_cursor_to_top_20
+  elif [ "${locate}" = "tail" ]; then
+    reset_cursor_to_top_20
+  fi
+  cursor_back_home
 }
 
 function adb_push() {
@@ -800,8 +816,8 @@ function adb_push() {
   fi
 
 ###Check des wether exist or not ?
-  local check=`adb shell ls ${des} | grep "No such file"`
-  [ "${check}" = "" ] && echo "$FUNCNAME success" && return
+#  local check=`adb shell ls ${des} | grep "No such file"`
+#  [ "${check}" = "" ] && echo "$FUNCNAME success" && return
   [ -e ${src} ] || 
   {
     echo "$FUNCNAME fail" && return
@@ -815,7 +831,6 @@ function adb_push() {
 
   check=`adb shell ls ${des} | grep "No such file"`
   [ "${check}" = "" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
-
 }
 
 function pc_iperf_c() {
@@ -880,14 +895,3 @@ function dut_kill_9_iperf_s() {
   done
 }
 
-function work_tag() {
-  echo " " >> ${OK_FAIL} && echo "$1 ..." >> ${OK_FAIL}
-}
-
-function check() {
-  echo "$1 [CHECK]" >> ${OK_FAIL}
-}
-
-function manual() {
-  echo "$1 [MANUAL]" >> ${OK_FAIL}
-}
