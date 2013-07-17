@@ -278,7 +278,7 @@ function add_network() {
   cursor_go 0
   sleep 1s
 
-  if [ "${mode}" = "${SECURT_MODE_NONE}" ]; then
+  if [ "${mode}" = "${SECURT_MODE_DISABLE}" ]; then
   #select none
     cursor_down_rel 0
     if [ "${show_mode}" = "true" ]; then
@@ -312,7 +312,7 @@ function add_network() {
     sleep 1s
 
 #show password and do screen captrue
-  if [ "${mode}" != "${SECURT_MODE_NONE}" ]; then
+  if [ "${mode}" != "${SECURT_MODE_DISABLE}" ]; then
     cursor_down
     if [ "${show_password}" = "true" ]; then
       cursor_click
@@ -364,7 +364,7 @@ function add_network() {
 
 #add_network show_mode=true,show_mode_png=1.png,show_password=true,show_password=true,show_password_png=2.png,enable_advances=true
 #add_network mode=${SECURT_MODE_WEP},password="1234567890",show_mode=true,show_mode_png=1.png,show_password=true,show_password=true,show_password_png=2.png,enable_advances=true
-#add_network mode=${SECURT_MODE_NONE},show_mode=true,show_mode_png=2.png,enable_advances=true
+#add_network mode=${SECURT_MODE_DISABLE},show_mode=true,show_mode_png=2.png,enable_advances=true
 #########################################################################################
 function scan_manual() {
   if [ "$(open_wifi)" = "open_wifi fail" ]; then
@@ -456,7 +456,7 @@ function connect_first_ssid() {
 #click first SSID
   cursor_go 1
   sleep 1s
-  if [ "${mode}" = "${SECURT_MODE_NONE}" ]; then
+  if [ "${mode}" = "${SECURT_MODE_DISABLE}" ]; then
   #select none
     cursor_click
   elif [ "${mode}" = "${SECURT_MODE_WEP}" ]; then
@@ -472,7 +472,7 @@ function connect_first_ssid() {
   sleep 1s
 
 #show password and do screen captrue
-  if [ "${mode}" != "${SECURT_MODE_NONE}" ]; then
+  if [ "${mode}" != "${SECURT_MODE_DISABLE}" ]; then
     cursor_down
     if [ "${show_password}" = "true" ]; then
       cursor_click
@@ -513,7 +513,7 @@ function connect_first_ssid() {
     adb -s ${DEVICES_MASTER} shell input text "8.8.4.4"
   fi
 
-  if [ "${mode}" != "${SECURT_MODE_NONE}" ]; then
+  if [ "${mode}" != "${SECURT_MODE_DISABLE}" ]; then
     reset_cursor_to_bottom
     cursor_right
     cursor_click
@@ -530,7 +530,7 @@ function connect_first_ssid() {
 }
 
 #connect_first_ssid mode=${SECURT_MODE_WEP},password="1234567890",show_password=true,show_password_png=1.png,enable_advances=true,show_advances=true,show_advances_png=2.png
-#connect_first_ssid mode=${SECURT_MODE_NONE}
+#connect_first_ssid mode=${SECURT_MODE_DISABLE}
 ###########################################################################################
 ##
 ###########################################################################################

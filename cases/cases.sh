@@ -57,6 +57,7 @@ export PC_IP_ADDR="192.168.1.222"
 export PUT_IP_ADDR="192.168.1.111"
 export WEB_INDEX="http://192.168.1.222/index.html"
 export WEB_DOWNLOAD_MP3="http://192.168.1.222/test/Beijing_Beijing.mp3"
+export WEB_DOWNLOAD_T2="http://192.168.1.222/test/T2.tar.gz"
 export PUT_DOWNLOAD_DIR="/data"
 export PC_DOWNLOAD_DIR="$(pwd)/results/download"
 export PNG="$(pwd)/results/png"
@@ -144,7 +145,7 @@ function PFT_2513_Manually_scan_available_AP_and_connect() {
   [ "$(scan_manual)" = "scan_manual success" ] &&
   [ "$(adb_screencap png=${FUNCNAME}_scan.png)" = "adb_screencap success" ] 
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid_ops locate="first",png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
   check ${FUNCNAME} 
 }
 
@@ -157,7 +158,7 @@ function PFT_2514_Show_AP_security_status_and_details() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
 
   [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid_ops success" ] 
-  [ "$(screen_captrue_ssid_ops locate="first", png=${FUNCNAME}_detail.png)" = "screen_captrue_ssid_ops success" ] 
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_detail.png)" = "screen_captrue_ssid_ops success" ] 
   check ${FUNCNAME} 
 }
 
@@ -170,7 +171,7 @@ function PFT_2515_Connect_to_AP_with_static_IP_when_have_no_static_on_DUT() {
   [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops fail" ] && return
 
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s
-  [ "$(screen_captrue_ssid_ops locate="first", png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] 
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] 
   check ${FUNCNAME}
 }
 
@@ -184,7 +185,7 @@ function PFT_2516_Connect_to_AP_with_static_IP_when_have_static_IP_on_DUT() {
 
   [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s
   [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_con.png)" = "screen_captrue_first_ssid success" ]
-  [ "$(browser_load_web http=${WEB_INDEX},png=${FUNCNAME}_web.png)" = "browser_load_web success" ]
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_web.png)" = "browser_load_web success" ]
   check ${FUNCNAME}
 }
 
@@ -280,8 +281,9 @@ function PFT_2525_Turn_on_off_Wifi_many_times() {
 
   for i in 1 2 3 4 5 6 7 8 9 10 ;do
     [ "$(open_wifi)" = "open_wifi success" ] &&
-    [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_${i}.png)" = "screen_captrue_ssid_ops success" ] &&
+    [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_open_${i}.png)" = "screen_captrue_ssid_ops success" ] &&
     [ "$(close_wifi)" = "close_wifi success" ]
+    [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_close_${i}.png)" = "screen_captrue_ssid_ops success" ] &&
   done
     
   check ${FUNCNAME} 
@@ -318,10 +320,10 @@ function PFT_2527_Test_Airplane_mode_when_wifi_is_enabled() {
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] &&
   for i in 1 2 3 4 5 ; do
     [ "$(airplane_ops true)" = "airplane_ops success" ] && sleep 15s &&
-    [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_discon_${i}.png)" = "screen_captrue_ssid_ops success" ]
+    [ "$(adb_screencap png=${FUNCNAME}_discon_${i}.png)" = "adb_screencap success" ]
 
     [ "$(airplane_ops false)" = "airplane_ops success" ] && sleep 15s &&
-    [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_con_${i}.png)" = "screen_captrue_ssid_ops success" ]
+    [ "$(adb_screencap png=${FUNCNAME}_con_${i}.png)" = "adb_screencap success" ]
   done
   [ "$(airplane_ops false)" = "airplane_ops success" ]
 
@@ -381,16 +383,16 @@ function PFT_2533_Turn_on_Turn_off_WiFi() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
 
   [ "$(open_wifi_directly)" = "open_wifi_directly success" ] && sleep 2s &&
-  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_open.png)" = "screen_captrue_ssid_ops success" ]
-
-  [ "$(close_wifi_directly)" = "close_wifi_directly success" ] && sleep 3s &&
-  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_close.png)" = "screen_captrue_ssid_ops success" ]
-
-  [ "$(open_wifi)" = "open_wifi success" ] && sleep 3s &&
   [ "$(adb_screencap png=${FUNCNAME}_open_directly.png)" = "adb_screencap success" ]
 
-  [ "$(close_wifi)" = "close_wifi success" ] && sleep 3s &&
+  [ "$(close_wifi_directly)" = "close_wifi_directly success" ] && sleep 3s &&
   [ "$(adb_screencap png=${FUNCNAME}_close_directly.png)" = "adb_screencap success" ]
+
+  [ "$(open_wifi)" = "open_wifi success" ] && sleep 3s &&
+  [ "$(adb_screencap png=${FUNCNAME}_open.png)" = "adb_screencap success" ]
+
+  [ "$(close_wifi)" = "close_wifi success" ] && sleep 3s &&
+  [ "$(adb_screencap png=${FUNCNAME}_close.png)" = "adb_screencap success" ]
  
   check ${FUNCNAME} 
 }
@@ -408,7 +410,7 @@ function PFT_2534_Start_to_auto_scan_after_turn_on_WiFi() {
 }
 
 ###Test Case ID PFT-2535 Auto refresh scan result every period of time
-function PFT_3535_Auto_refresh_scan_results_every_period_of_time() {
+function PFT_2535_Auto_refresh_scan_results_every_period_of_time() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
@@ -416,7 +418,7 @@ function PFT_3535_Auto_refresh_scan_results_every_period_of_time() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
 
   [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_before.png)" = "screen_captrue_ssid_ops success" ]
-  [ "$(set_ap_ops ssid_24g='PFT_3533')" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops ssid_24g='PFT_2535')" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_later.png)" = "screen_captrue_ssid_ops success" ]
   check ${FUNCNAME} 
 }
@@ -443,14 +445,14 @@ function PFT_2537_Show_AP_signal_strength_SSID_security_type_of_scanned_network_
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_default.png)" = "screen_captrue_ssid_ops success" ] 
 
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_NONE})" = "set_ap_ops success" ] &&
-  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_default.png)" = "screen_captrue_ssid_ops success" ] 
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_none.png)" = "screen_captrue_ssid_ops success" ] 
 
   [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WEP})" = "set_ap_ops success" ] &&
-  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_default.png)" = "screen_captrue_ssid_ops success" ] 
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_wep.png)" = "screen_captrue_ssid_ops success" ] 
 
   [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_80211x_EAP})" = "set_ap_ops success" ] &&
-  [ "$(screen_captrue_ssid_ops locate-'first',png=${FUNCNAME}_default.png)" = "screen_captrue_ssid_ops success" ] 
+  [ "$(screen_captrue_ssid_ops locate-'first',png=${FUNCNAME}_eap.png)" = "screen_captrue_ssid_ops success" ] 
 
   check ${FUNCNAME} 
 }
@@ -464,10 +466,10 @@ function PFT_2538_Show_different_security_type_and_Signal_strength_for_AP() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_default.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g={SECURT_MODE_WEP})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WEP})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_wep.png)" = "screen_captrue_ssid_ops success" ] 
 
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g={SECURT_MODE_80211x_EAP})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_80211x_EAP})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_80211eap.png)" = "screen_captrue_ssid_ops success" ]
  
   check ${FUNCNAME} 
@@ -482,9 +484,9 @@ function PFT_2539_Support_show_password_option_when_input_password() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
   [ "$(connect_first_ssid show_password=true,png=${FUNCNAME}_con.png)" = "connect_first_ssid success" ]
 
-  [ "$(add_network mode=${SECURT_MODE_WEP},password={SECURT_MODE_WEP},show_password=true,png=${FUNCNAME}_pw_wep.png)" = "add_network success" ]
-  [ "$(add_network mode=${SECURT_MODE_WPA_WPA2},show_password=true,png=${FUNCNAME}_pw_wpa2.png)" = "add_network success" ] 
-  [ "$(add_network mode=${SECURT_MODE_80211x_EAP},show_password=true,png=${FUNCNAME}_pw_eap.png)" = "add_network success" ]
+  [ "$(add_network mode=${SECURT_MODE_WEP},password=${SECURT_MODE_WEP},show_password=true,show_password_png=${FUNCNAME}_pw_wep.png)" = "add_network success" ]
+  [ "$(add_network mode=${SECURT_MODE_WPA_WPA2},show_password=true,show_password_png=${FUNCNAME}_pw_wpa2.png)" = "add_network success" ] 
+  [ "$(add_network mode=${SECURT_MODE_80211x_EAP},show_password=true,show_password_png=${FUNCNAME}_pw_eap.png)" = "add_network success" ]
   
   check ${FUNCNAME} 
 }
@@ -510,9 +512,9 @@ function PFT_2541_Show_WiFi_icon_for_connected_network_and_icon_will_disappear_a
       sleep 3s
       adb_screencap png=${FUNCNAME}_downloading.png
     }&
-    [ "$(browser_ops http=${WEB_DOWNLOAD_MP3},file_name=${FUNCNAME}.mp3)" = "browser_ops success" ] &&
-    [ "$(close_wifi)" = "close_wifi success" ] && [ "$(adb_screencap png=${FUNCNAME}_discon.png)" = "adb_screencap success" ]
-    [ "$(open_wifi)" = "open_wifi" ] && sleep 5s && [ "$(adb_screencap png=${FUNCNAME}_con.png)" = "adb_screencap success" ]
+    [ "$(browser_ops http=${WEB_DOWNLOAD_T2},file_name=${FUNCNAME}.mp3)" = "browser_ops success" ] &&
+    [ "$(close_wifi)" = "close_wifi success" ] && [ "$(adb_screencap png=${FUNCNAME}_close.png)" = "adb_screencap success" ]
+    [ "$(open_wifi)" = "open_wifi" ] && sleep 5s && [ "$(adb_screencap png=${FUNCNAME}_open.png)" = "adb_screencap success" ]
   }
   check ${FUNCNAME} 
 }
@@ -547,7 +549,7 @@ function PFT_2544_Cannot_connect_AP_successfully_with_wrong_password() {
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
  
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WEP},passphrase_24g=${SSID_PASSWORD_WEP})" = "set_ap_ops success"] && {
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WEP},passphrase_24g=${SSID_PASSWORD_WEP})" = "set_ap_ops success" ] && {
     [ "$(connect_first_ssid password=0987654321)" = "connect_first_ssid fail" ] && sleep 10s &&
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_wep_discon_len_10.png)" = "screen_captrue_ssid_ops success" ]
     
@@ -555,7 +557,7 @@ function PFT_2544_Cannot_connect_AP_successfully_with_wrong_password() {
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_wep_discon_len_9.png)" = "screen_captrue_ssid_ops success" ]
   }
   
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA_WPA2})" = "set_ap_ops success"] && {
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA_WPA2})" = "set_ap_ops success" ] && {
     [ "$(connect_first_ssid password=87654321)" = "connect_first_ssid fail" ] && sleep 10s &&
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_wpa2_discon_len_10.png)" = "screen_captrue_ssid_ops success" ]
     
@@ -563,7 +565,7 @@ function PFT_2544_Cannot_connect_AP_successfully_with_wrong_password() {
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_wpa2_discon_len_9.png)" = "screen_captrue_ssid_ops success" ]
   }
   
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_80211x_EAP})" = "set_ap_ops success"] && {
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_80211x_EAP})" = "set_ap_ops success" ] && {
     [ "$(connect_first_ssid password=87654321)" = "connect_first_ssid fail" ] && sleep 10s &&
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_eap_discon_len_10.png)" = "screen_captrue_ssid_ops success" ]
     
@@ -658,9 +660,9 @@ function PFT_2554_Add_a_AP_profile_with_None() {
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g={SECURT_MODE_NONE})" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g={SECURT_MODE_DISABLE})" = "set_ap_ops fail" ] && return
   
-  [ "$(add_network mode={SECURT_MODE_NONE})" = "add_network success" ] &&
+  [ "$(add_network mode={SECURT_MODE_DISABLE})" = "add_network success" ] &&
   [ "$(adb_screencap png=${FUNCNAME}.png)" = "adb_screencap success" ] &&
   check ${FUNCNAME} 
 }
@@ -698,7 +700,7 @@ function PFT_2557_Support_add_use_configured_AP_with_None_WEP_WPA2_802.11x_EAP()
  
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(add_network mode={SECURT_MODE_NONE}, ssid='PFT_2557_NONE')" = "add_network success" ] 
+  [ "$(add_network mode={SECURT_MODE_DISABLE}, ssid='PFT_2557_NONE')" = "add_network success" ] 
   [ "$(add_network mode={SECURT_MODE_WPA_WPA2}, ssid='PFT_2557_WPA2')" = "add_network success" ] 
   [ "$(add_network mode={SECURT_MODE_WEP}, ssid='PFT_2557_WEP')" = "add_network success" ] 
   [ "$(add_network mode={SECURT_MODE_80211x_EAP, ssid='PFT_2557_EAP')" = "add_network success" ] 
@@ -848,7 +850,7 @@ function PFT_2576_Add_a_ap_with_open_manually() {
  
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(add_network ssid=PFT_2576,mode=${SECURT_MODE_NONE})" = "add_network success" ] &&
+  [ "$(add_network ssid=PFT_2576,mode=${SECURT_MODE_DISABLE})" = "add_network success" ] &&
   [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_tail.png)" = "screen_captrue_ssid success" ] &&
   [ "$(screen_captrue_ssid locate='last',png=${FUNCNAME}_last.png)" = "screen_captrue_ssid success" ] &&
   check ${FUNCNAME} 
@@ -860,9 +862,9 @@ function PFT_2577_Connect_a_open_AP_from_scan_result() {
  
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_NONE})" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_DISABLE})" = "set_ap_ops fail" ] && return
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "connect_first_ssid success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid success" ] &&
   [ "$(browser_load_web http=${WEB_INDEX},png=${FUNCNAME}.png)" ] &&
   check ${FUNCNAME} 
 }
@@ -876,7 +878,7 @@ function PFT_2578_Connect_to_a_hidden_AP_with_OPEN() {
   [ "$(set_ap_ops security_mode_24g=${SECURT_MODE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_before.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "connect_first_ssid success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid success" ] &&
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_later.png)" = "screen_captrue_ssid" ] &&
   check ${FUNCNAME} 
 }
@@ -911,10 +913,10 @@ function PFT_2583_Ap_with_OPEN_Disable_DHCP_Hide_SSID_Manual_add_Donot_have_stat
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network mode=${SECURT_MODE_NONE})" = "add_network fail" ] && sleep 10 s
+  [ "$(add_network mode=${SECURT_MODE_DISABLE})" = "add_network fail" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid success" ] &&
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
@@ -928,9 +930,9 @@ function PFT_2584_Ap_with_OPEN_Disable_DHCP_Hide_SSID_Manual_add_have_static_IP_
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(add_network mode=${SECURT_MODE_NONE},enable_advances=true)" = "add_network success" ] && sleep 10 s
+  [ "$(add_network mode=${SECURT_MODE_DISABLE},enable_advances=true)" = "add_network success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
   [ "$(browser_load_web png=${FUNCNAME}_con.png)" = "browser_load_web success" ] &&
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
@@ -945,9 +947,9 @@ function PFT_2585_Ap_with_Open_Disable_DHCP_Show_SSID_have_static_IP_forget_AP()
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE},enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE},enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
   [ "$(browser_load_web png=${FUNCNAME}_con.png)" = "browser_load_web success" ] &&
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
@@ -962,9 +964,9 @@ function PFT_2586_AP_with_Open_Disable_DHCP_Show_SSID_Donot_have_static_IP_forge
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},dhcp=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "connect_first_ssid success" ] && sleep 10 s
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid fail" ] &&
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
@@ -978,10 +980,10 @@ function PFT_2587_Ap_with_OPEN_Enable_DHCP_Hide_SSID_Manual_add_Donot_have_stati
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(add_network mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
   [ "$(browser_load_web png=${FUNCNAME}_web.png)" = "browser_load_web success" ] &&
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
@@ -996,9 +998,9 @@ function PFT_2588_AP_with_Open_Enable_DHCP_Show_SSID_Donot_have_static_IP_Auto_c
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE})" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE})" = "set_ap_ops fail" ] && return
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
   [ "$(browser_load_web png=${FUNCNAME}_web.png)" = "browser_load_web success" ] &&
   [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
@@ -1017,20 +1019,20 @@ function PFT_2589_Connect_AP_with_802.11_b_and_802.11_g_and_802.11_n() {
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_B},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_B},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_B_con.png)" = "screen_captrue_ssid success" ]
 
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_G},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_G},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_G_con.png)" = "screen_captrue_ssid success" ]
 
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_N},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_N},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_N_con.png)" = "screen_captrue_ssid success" ]
 
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_NONE},network_mode_24g=${NETWORK_MODE_BG},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_NONE})" = "add_network success" ] && sleep 10 s
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_BG},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
   [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_BG_con.png)" = "screen_captrue_ssid success" ]
 
   check ${FUNCNAME}
