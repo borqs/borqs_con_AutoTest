@@ -133,16 +133,16 @@ function Wireless_Security() {
 
  case ${security_mode_24g} in
    "${SECURT_MODE_WPA_WPA2}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=${crypto_24g}&wl1_crypto=${crypto_5g}&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip%2Baes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
      ;;
    "${SECURT_MODE_WPA2_PERSONAL}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=${crypto_24g}&wl1_crypto=${crypto_5g}&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=aes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
      ;;
    "${SECURT_MODE_WPA_PERSONAL}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=${crypto_24g}&wl1_crypto=${crypto_5g}&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
      ;;
    "${SECURT_MODE_ENTERPRISE_MIXED_MODE}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=${crypto_24g}&wl1_crypto=${crypto_5g}&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=120&wl0_radius_port=1812&wl0_radius_key=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip%2Baes&wl1_crypto=tkip%2Baes%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=120&wl0_radius_port=1812&wl0_radius_key=${passphrase_24g}"
      ;;
    "${SECURT_MODE_WPA2_ENTERPRISE}")
      local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=12345678&wsc_nwkey1=987654321&wl0_crypto=aes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=987654321&wl0_security_mode=wpa2_enterprise&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=121&wl0_radius_port=1812&wl0_radius_key=12345678"
@@ -246,6 +246,8 @@ function set_ap_ops() {
 
 #others:
   local func=${FUNCNAME}
+  local crypto_24g=${CRYPT_24G_MIXED}
+  local crypto_5g=${CRYPT_5G_MIXED}
  
   [ "${arg}" != "" ] &&
   for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19; do 
@@ -321,7 +323,7 @@ function set_ap_ops() {
 
   sleep 3s
 
-  if [ "$(Wireless_Security security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g})" = "Wireless_Security fail" ]; then
+  if [ "$(Wireless_Security security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g},crypto_24g=${crypto_24g},crypto_5g=${crypto_5g})" = "Wireless_Security fail" ]; then
     echo "${FUNCNAME} fail"  &&  opt_fail ${func} && return
   fi
 

@@ -46,6 +46,9 @@ export SECURT_MODE_DISABLE="disabled"
 export CRYPT_24G_MIXED="tkip%2Baes"
 export CRYPT_24G_TKIP="tkip"
 export CRYPT_24G_AES="aes"
+export CRYPT_5G_MIXED="tkip%2Baes"
+export CRYPT_5G_TKIP="tkip"
+export CRYPT_5G_AES="aes"
 export SSID_PASSWORD="12345678"
 export SSID_PASSWORD_WEP="1234567890"
 #--------------------------------------------------------------------------------------
@@ -185,7 +188,7 @@ function PFT_2516_Connect_to_AP_with_static_IP_when_have_static_IP_on_DUT() {
 
   [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s
   [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_con.png)" = "screen_captrue_first_ssid success" ]
-  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_web.png)" = "browser_load_web success" ]
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_web.png)" = "browser_ops success" ]
   check ${FUNCNAME}
 }
 
@@ -245,9 +248,9 @@ function PFT_2522_Wifi_icon_disappears_after_disconnect_from_AP() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
  
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ]
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] && sleep 5s &&
-  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ]
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ]
 
   check ${FUNCNAME} 
 }
@@ -282,8 +285,8 @@ function PFT_2525_Turn_on_off_Wifi_many_times() {
   for i in 1 2 3 4 5 6 7 8 9 10 ;do
     [ "$(open_wifi)" = "open_wifi success" ] &&
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_open_${i}.png)" = "screen_captrue_ssid_ops success" ] &&
-    [ "$(close_wifi)" = "close_wifi success" ]
-    [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_close_${i}.png)" = "screen_captrue_ssid_ops success" ] &&
+    [ "$(close_wifi)" = "close_wifi success" ] &&
+    [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_close_${i}.png)" = "screen_captrue_ssid_ops success" ]
   done
     
   check ${FUNCNAME} 
@@ -663,7 +666,7 @@ function PFT_2554_Add_a_AP_profile_with_None() {
   [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g={SECURT_MODE_DISABLE})" = "set_ap_ops fail" ] && return
   
   [ "$(add_network mode={SECURT_MODE_DISABLE})" = "add_network success" ] &&
-  [ "$(adb_screencap png=${FUNCNAME}.png)" = "adb_screencap success" ] &&
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}.png)" = "screen_captrue_ssid_ops success" ] &&
   check ${FUNCNAME} 
 }
 
@@ -676,7 +679,7 @@ function PFT_2555_Add_a_AP_profile_with_WEP() {
   [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g={SECURT_MODE_WEP})" = "set_ap_ops fail" ] && return
   
   [ "$(add_network mode={SECURT_MODE_WEP})" = "add_network success" ] &&
-  [ "$(adb_screencap png=${FUNCNAME}.png)" = "adb_screencap success" ] &&
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}.png)" = "screen_captrue_ssid_ops success" ] &&
   check ${FUNCNAME} 
 }
 
@@ -689,7 +692,7 @@ function PFT_2556_Add_a_AP_profile_with_WPA2() {
   [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE})" = "set_ap_ops fail" ] && return
   
   [ "$(add_network mode={SECURT_MODE_WPA_WPA2})" = "add_network success" ] &&
-  [ "$(adb_screencap png=${FUNCNAME}.png)" = "adb_screencap success" ] &&
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}.png)" = "screen_captrue_ssid_ops success" ] &&
   check ${FUNCNAME} 
 }
 
@@ -698,13 +701,21 @@ function PFT_2556_Add_a_AP_profile_with_WPA2() {
 function PFT_2557_Support_add_use_configured_AP_with_None_WEP_WPA2_802.11x_EAP() {
   work_tag ${FUNCNAME}
  
-  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
-  
-  [ "$(add_network mode={SECURT_MODE_DISABLE}, ssid='PFT_2557_NONE')" = "add_network success" ] 
-  [ "$(add_network mode={SECURT_MODE_WPA_WPA2}, ssid='PFT_2557_WPA2')" = "add_network success" ] 
-  [ "$(add_network mode={SECURT_MODE_WEP}, ssid='PFT_2557_WEP')" = "add_network success" ] 
-  [ "$(add_network mode={SECURT_MODE_80211x_EAP, ssid='PFT_2557_EAP')" = "add_network success" ] 
-  [ "$(adb_screencap png=${FUNCNAME}.png,locate=${FUNCNAME}.png)" = "adb_screencap success" ]
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] && 
+  [ "$(add_network mode={SECURT_MODE_DISABLE},ssid='PFT_2557_NONE')" = "add_network success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_none.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network mode={SECURT_MODE_WPA_WPA2},ssid='PFT_2557_WPA_WPA2')" = "add_network success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_wpa_wpa2.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network mode={SECURT_MODE_WEP},ssid='PFT_2557_WEP')" = "add_network success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_wep.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network mode={SECURT_MODE_80211x_EAP,ssid='PFT_2557_EAP')" = "add_network success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_eap.png)" = "screen_captrue_ssid_ops success" ]
  
   check ${FUNCNAME} 
 }
@@ -719,15 +730,21 @@ function PFT_2558_Can_support_edit_SSID_of_wifi() {
 function PFT_2559_Password_length_test_for_WiFi_with_WPA2_mode() {
   work_tag ${FUNCNAME}
  
-  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
-
-  [ "$(add_network ssid='PFT_2559_l8',mode=${SECURT_MODE_WPA_WPA2},password='Aa%#&@$',show_password=true,password_png=${FUNCNAME}_l8.png)" = "add_network success" ] && sleep 3 
-  [ "$(add_network ssid='PFT_2559_8',mode=${SECURT_MODE_WPA_WPA2},password='AaB%#&@$',show_password=true,password_png=${FUNCNAME}_8.png)" = "add_network success" ] && sleep 3 
-  [ "$(add_network ssid='PFT_2559_m8',mode=${SECURT_MODE_WPA_WPA2},password='AaBBB%#&@$',show_password=true,password_png=${FUNCNAME}_m8)" = "add_network success" ] && sleep 3 
-  
-  [ "$(add_network ssid='PFT_2559_mm8',mode=${SECURT_MODE_WPA_WPA2},password='abcdefghijklmnopqrstuvwxyz',show_password=true,password_png=${FUNCNAME}_mm8.png)" = "add_network success" ] && sleep 3 
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2559_l8',mode=${SECURT_MODE_WPA_WPA2},password='Aa%#&@$',show_password=true,password_png=${FUNCNAME}_l8.png)" = "add_network success" ] && sleep 3
  
-  [ "$(adb_screencap png=${FUNCNAME}.png,locate='tail')" = "adb_screencap success" ] && 
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2559_8',mode=${SECURT_MODE_WPA_WPA2},password='AaB%#&@$',show_password=true,password_png=${FUNCNAME}_8.png)" = "add_network success" ] && sleep 3 && 
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_8.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2559_m8',mode=${SECURT_MODE_WPA_WPA2},password='AaBBB%#&@$',show_password=true,password_png=${FUNCNAME}_m8)" = "add_network success" ] && sleep 3 &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_m8.png)" = "screen_captrue_ssid_ops success" ]
+  
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2559_mm8',mode=${SECURT_MODE_WPA_WPA2},password='abcdefghijklmnopqrstuvwxyz',show_password=true,password_png=${FUNCNAME}_mm8.png)" = "add_network success" ] && sleep 3 &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_mm8.png)" = "screen_captrue_ssid_ops success" ]
+ 
   check ${FUNCNAME} 
 } 
 
@@ -735,15 +752,22 @@ function PFT_2559_Password_length_test_for_WiFi_with_WPA2_mode() {
 function PFT_2560_Password_length_test_for_WiFi_with_WEP_mode() {
   work_tag ${FUNCNAME}
  
-  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2560_l16',mode=${SECURT_MODE_WEP},password='Aa%#&@$',show_password=true,password_png=${FUNCNAME}_l16.png)" = "add_network success" ] && sleep 3 &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_l16.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(add_network ssid='PFT_2560_l16',mode=${SECURT_MODE_WEP},password='Aa%#&@$',show_password=true,password_png=${FUNCNAME}_l16.png)" = "add_network success" ] && sleep 3
-  [ "$(add_network ssid='PFT_2560_16',mode=${SECURT_MODE_WEP},password='AaBbCcDdEeF%#&@$',show_password=true,password_png=${FUNCNAME}_16.png)" = "add_network success" ] && sleep 3
-  [ "$(add_network ssid='PFT_2560_m16',mode=${SECURT_MODE_WEP},password='AaBBBCcDdEeFfGg%#&@$',show_password=true,password_png=${FUNCNAME}_m16)" = "add_network success" ] && sleep 3
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2560_16',mode=${SECURT_MODE_WEP},password='AaBbCcDdEeF%#&@$',show_password=true,password_png=${FUNCNAME}_16.png)" = "add_network success" ] && sleep 3 &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_16.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(add_network ssid='PFT_2560_mm16',mode=${SECURT_MODE_WEP},password='abcdefghijklmnopqrstuvwxyz',show_password=true,password_png=${FUNCNAME}_mm16.png)" = "add_network success" ] && sleep 3
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2560_m16',mode=${SECURT_MODE_WEP},password='AaBBBCcDdEeFfGg%#&@$',show_password=true,password_png=${FUNCNAME}_m16)" = "add_network success" ] && sleep 3 &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_m16.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(adb_screencap png=${FUNCNAME}.png,locate='tail')" = "adb_screencap success" ] &&
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
+  [ "$(add_network ssid='PFT_2560_mm16',mode=${SECURT_MODE_WEP},password='abcdefghijklmnopqrstuvwxyz',show_password=true,password_png=${FUNCNAME}_mm16.png)" = "add_network success" ] && sleep 3 &&
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_mm16.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME} 
 }
 
@@ -753,7 +777,7 @@ function PFT_2563_WiFi_frequency_band() {
  
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
 
-  [ "$(screen_captrue_advances freq_band='true',png=${FUNCNAME}.png)" = "screen_captrue_advances success" ] &&
+  [ "$(wifi_advances_ops enable_freq_band=true,show_freq_band=true,png=${FUNCNAME}.png)" = "wifi_advances_ops success" ] &&
   check ${FUNCNAME} 
 }
 
@@ -763,21 +787,22 @@ function PFT_2564_Default_by_wifi_frequency_band () {
  
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
 
-  [ "$(screen_captrue_advances freq_band='true',png=${FUNCNAME}.png)" = "screen_captrue_advances success" ] &&
+  [ "$(wifi_advances_ops enable_freq_band=true,show_freq_band=true,png=${FUNCNAME}.png)" = "wifi_advances_ops success" ] &&
   check ${FUNCNAME} 
 }
 
 ### Test Case ID PFT-2566 2.4GHz only with wifi frequency band
-function PFT_2556_24G_only_with_wifi_frequency_band() {
+function PFT_2566_24G_only_with_wifi_frequency_band() {
   work_tag ${FUNCNAME}
  
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
  
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
 
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_default.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_advances set_freq_band='24g',png=${FUNCNAME}_set_24g.png)" = "screen_captrue_advances success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_24g.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_default.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(wifi_advances_ops enable_freq_band=true,set_freq_band='24g')" = "wifi_advances_ops success" ] &&
+  [ "$(wifi_advances_ops enable_freq_band=true,show_freq_band=true,png=${FUNCNAME}_24g.png)" = "wifi_advances_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_24g.png)" = "screen_captrue_ssid_ops success" ] &&
   check ${FUNCNAME} 
 }
 
@@ -796,9 +821,9 @@ function PFT_2568_Support_view_IP_MAC_address() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
 
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] &&
-  [ "$(screen_captrue_advances ip_mac=true)" = "screen_captrue_advances success" ] &&
+  [ "$(wifi_advances_ops show_ip_mac=true,png=${FUNCNAME}_ip_mac.png)" = "wifi_advances_ops success" ]
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_advances ip_mac=true)" = "screen_captrue_advances success" ] &&
+  [ "$(wifi_advances_ops show_ip_mac=true,png=${FUNCNAME}_no_ip_mac.png)" = "wifi_advances_ops success" ]
   check ${FUNCNAME} 
 }
 
@@ -850,9 +875,9 @@ function PFT_2576_Add_a_ap_with_open_manually() {
  
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(add_network ssid=PFT_2576,mode=${SECURT_MODE_DISABLE})" = "add_network success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_tail.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='last',png=${FUNCNAME}_last.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(add_network ssid='PFT_2576',mode=${SECURT_MODE_DISABLE})" = "add_network success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_tail.png)" = "screen_captrue_ssid_ops success" ]
+  [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_last.png)" = "screen_captrue_ssid_ops success" ]
   check ${FUNCNAME} 
 }
 
@@ -865,7 +890,8 @@ function PFT_2577_Connect_a_open_AP_from_scan_result() {
   [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_DISABLE})" = "set_ap_ops fail" ] && return
 
   [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid success" ] &&
-  [ "$(browser_load_web http=${WEB_INDEX},png=${FUNCNAME}.png)" ] &&
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ]
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_discon.png)" = "browser_ops success" ]
   check ${FUNCNAME} 
 }
 
@@ -875,11 +901,11 @@ function PFT_2578_Connect_to_a_hidden_AP_with_OPEN() {
  
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_before.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_before.png)" = "screen_captrue_ssid_ops success" ] &&
   [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_later.png)" = "screen_captrue_ssid" ] &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_later.png)" = "screen_captrue_ssid" ] &&
   check ${FUNCNAME} 
 }
 
@@ -913,14 +939,18 @@ function PFT_2583_Ap_with_OPEN_Disable_DHCP_Hide_SSID_Manual_add_Donot_have_stat
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network mode=${SECURT_MODE_DISABLE})" = "add_network fail" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network mode=${SECURT_MODE_DISABLE})" = "add_network fail" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] 
+
   check ${FUNCNAME}
 }
 
@@ -930,14 +960,18 @@ function PFT_2584_Ap_with_OPEN_Disable_DHCP_Hide_SSID_Manual_add_have_static_IP_
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false,ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(add_network mode=${SECURT_MODE_DISABLE},enable_advances=true)" = "add_network success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png=${FUNCNAME}_con.png)" = "browser_load_web success" ] &&
+  [ "$(add_network mode=${SECURT_MODE_DISABLE},enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_con.png)" = "browser_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] 
+
   check ${FUNCNAME}
 }
 
@@ -947,14 +981,18 @@ function PFT_2585_Ap_with_Open_Disable_DHCP_Show_SSID_have_static_IP_forget_AP()
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops fail" ] && return
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE},enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png=${FUNCNAME}_con.png)" = "browser_load_web success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE},enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_con.png)" = "browser_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] 
+
   check ${FUNCNAME}
 }
 
@@ -964,13 +1002,17 @@ function PFT_2586_AP_with_Open_Disable_DHCP_Show_SSID_Donot_have_static_IP_forge
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},dhcp=false)" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops fail" ] && return
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid fail" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid fail" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_abt_ip.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] 
+
   check ${FUNCNAME}
 }
 
@@ -982,13 +1024,17 @@ function PFT_2587_Ap_with_OPEN_Enable_DHCP_Hide_SSID_Manual_add_Donot_have_stati
   
   [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},ssid_broadcast_24g=false)" = "set_ap_ops fail" ] && return
 
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png=${FUNCNAME}_web.png)" = "browser_load_web success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_web.png)" = "browser_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] 
+
   check ${FUNCNAME}
 }
 
@@ -1000,16 +1046,22 @@ function PFT_2588_AP_with_Open_Enable_DHCP_Show_SSID_Donot_have_static_IP_Auto_c
   
   [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE})" = "set_ap_ops fail" ] && return
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png=${FUNCNAME}_web.png)" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops switch='on')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}_web.png)" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] 
+
   check ${FUNCNAME}
 }
 
@@ -1019,21 +1071,23 @@ function PFT_2589_Connect_AP_with_802.11_b_and_802.11_g_and_802.11_n() {
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_B},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_B_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_B})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_B_con.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_G},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_G_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_G})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_G_con.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_N},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_N_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_N_con.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_DISABLE},network_mode_24g=${NETWORK_MODE_BG},channel_width_24g={NETWORK_WIDTH_24G})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid mode=${SECURT_MODE_DISABLE})" = "add_network success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_BG_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] 
 
   check ${FUNCNAME}
 }
@@ -1050,17 +1104,21 @@ function PFT_2591_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_TKIP_Donot_
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ] &&
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
   check ${FUNCNAME}
 }
 
@@ -1070,17 +1128,22 @@ function PFT_2592_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_AES_Donot_h
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] && 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
@@ -1090,17 +1153,22 @@ function PFT_2593_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_TKIP_Donot
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }  
 
@@ -1110,17 +1178,22 @@ function PFT_2594_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_AES_Donot_
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2})" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
@@ -1131,16 +1204,21 @@ function PFT_2595_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_Security_Auto_selec
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
   [ "$(set_ap_ops)" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
   [ "$(set_ap_ops)" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
@@ -1151,191 +1229,742 @@ function PFT_2596_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_Security_Auto_selec
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
   [ "$(set_ap_ops)" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid password='87654321')" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(connect_first_ssid password='87654321')" = "connect_first_ssid fail" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2597 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+have static IP+correct password+forget AP
-function PFT_2597_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_TKIP_have_static_IP_correct_password_forget_AP() {
+### Test Case ID PFT-2597 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2597_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_TKIP_have_static_IP_Correct_password+Auto_connect_forget_AP(){
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ] &&
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2598 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+AES+have static IP+correct password+forget AP
-function PFT_2598_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_AES_have_static_IP_correct_password_forget_AP() {
+### Test Case ID PFT-2598 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2598_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA})" = "set_ap_ops success" ] && sleep 10s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2599 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+have static IP+correct password+forget AP
-function PFT_2599_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_TKIP_have_static_IP_correct_password_forget_AP() {
+### Test Case ID PFT-2599 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2599_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_TKIP_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 10s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
-  check ${FUNCNAME}
-}
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
 
-### Test Case ID PFT-2600 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+have static IP+correct password+forget AP
-function PFT_2600_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_AES_have_static_IP_correct_password_forget_AP() {
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}  
+
+### Test Case ID PFT-2600 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2600_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_WPA2_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(set_ap_ops switch='off')" = "set_ap_ops success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(set_ap_ops security_mode_5g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] && sleep 10s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2601 Ap with WPA/WPA2 PSK+Enable DHCP+Show SSID+Security(Auto select)+encryption(Auto select)+have static
-function PFT_2601_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_Security_Auto_select_encryption_Auto_select_have_staticIP_correct_password_forget_AP() {
+### Test case ID PFT-2601 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+Security(Auto select)+encryption(Auto select)+have static IP+Correct password+Auto connect+forget AP
+function PFT_2601_AP_with_WPA_WPA2_PSK_Enable_DHCP_Show_SSID_Security_Auto_select_encryption_Auto_select_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
   [ "$(set_ap_ops)" = "set_ap_ops success" ] &&
-  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10 s
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ]
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops)" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops)" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2602 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA-PSK+TKIP+Manual add+Donot have static IP+correct password+Forget AP
-function PFT_2602_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_TKIP_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+
+### Test Case ID PFT-2602 AP with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2602_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_TKIP_Donot_have_static_IP_Correct_password+Auto_connect_forget_AP(){
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 5s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ] &&
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2603 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA-PSK+TKIP+Manual add+Donot have static IP+correct password+Forget AP
-function PFT_2603_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_AES_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+### Test Case ID PFT-2603 AP with WPA/WPA2 PSK+Hide DHCP+Show SSID+WPA-PSK+AES+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2603_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_AES_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] && sleep 5s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2604 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA2-PSK+TKIP+Manual add+Donot have static IP+correct password+Forget AP
-function PFT_2604_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_TKIP_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+### Test Case ID PFT-2604 AP with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA2-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2604_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_TKIP_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_TKIP})" = "set_ap_ops success" ] && sleep 5s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
-  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
-  check ${FUNCNAME}
-}
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
 
-### Test Case ID PFT-2605 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA2-PSK+AES+Manual add+Donot have static IP+correct password+Forget AP
-function PFT_2605_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_AES_Manual_add_Donot_have_static_IP_correct_password_Forget_AP() {
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}  
+
+### Test Case ID PFT-2605 AP with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA2-PSK+AES+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2605_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_AES_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops ssid_broadcast_24g=false,security_mode_24g=${SECURT_MODE_WPA2},wpa_encrypt_method=${WPA_ENCRPPT_AES})" = "set_ap_ops success" ] && sleep 5s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_scan.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(add_network)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
-### Test Case ID PFT-2606 Ap with WPA/WPA2 PSK+Enable DHCP+Hide SSID+Security(Auto select)+encryption(Auto select)+Do not have static
-function PFT_2606_Ap_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_Do_not_have_staticIP_correct_password_forget_AP() {
+### Test case ID PFT-2606 AP with WPA/WPA2 PSK+Enable DHCP+Hide SSID+Security(Auto select)+encryption(Auto select)+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2606_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_Donot_have_static_IP_Correct_password_Auto_connect_forget_AP() {
   work_tag ${FUNCNAME}
 
   [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
   
-  [ "$(set_ap_ops ssid_broadcast_24g=false)" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test case ID PFT-2607 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP/WPA-PSK+AES/WPA2-PSK+TKIP/WPA2-PSK+AES/Security(Auto select)+encryption(Auto select)+Donot have static IP+Incorrect password+Auto connect+forget AP
+function PFT_2607_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_Donot_have_static_IP_Incorrect_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network password='87654321')" = "add_network fail" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2608 AP with WPA/WPA2 PSK+Enable DHCP+Hide SSID+WPA-PSK+TKIP+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2608_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_TKIP_have_static_IP_Correct_password+Auto_connect_forget_AP(){
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ] &&
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2598 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2609_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2610 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2610_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_TKIP_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}  
+
+### Test Case ID PFT-2600 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2611_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test case ID PFT-2601 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+Security(Auto select)+encryption(Auto select)+have static IP+Correct password+Auto connect+forget AP
+function PFT_2612_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test case ID PFT-2613 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP/WPA-PSK+AES/WPA2-PSK+TKIP/WPA2-PSK+AES/Security(Auto select)+encryption(Auto select)+Donot have static IP+Incorrect password+Auto connect+forget AP
+function PFT_2613_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_have_static_IP_Incorrect_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network password='87654321',enable_advances=true)" = "add_network fail" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+  check ${FUNCNAME}
+}
+
+### Test case ID PFT-2596 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP/WPA-PSK+AES/WPA2-PSK+TKIP/WPA2-PSK+AES/Security(Auto select)+encryption(Auto select)+Donot have static IP+Incorrect password+Auto connect+forget AP
+function PFT_2614_AP_with_WPA_WPA2_PSK_Disable_DHCP_Show_SSID_Security_Auto_select_encryption_Auto_select_Donot_have_static_IP_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid fail" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+  check ${FUNCNAME}
+}
+
+
+### Test Case ID PFT-2597 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2615_AP_with_WPA_WPA2_PSK_Disable_DHCP_Show_SSID_WPA_PSK_TKIP_have_static_IP_Correct_password+Auto_connect_forget_AP(){
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(browser_load_web png={FUNCNAME}_web.png})" = "browser_load_web success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ] &&
+
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid success" ] &&
-  [ "$(screen_captrue_ssid locate='tail',png=${FUNCNAME}_forget_tail.png)" = "screen_captrue_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2598 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2616_AP_with_WPA_WPA2_PSK_Disable_DHCP_Show_SSID_WPA_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png,lan_proto=${DHCP_SERVER_DISABLE})" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2599 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2617_AP_with_WPA_WPA2_PSK_Disable_DHCP_Show_SSID_WPA2_PSK_TKIP_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}  
+
+### Test Case ID PFT-2600 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2618_AP_with_WPA_WPA2_PSK_Disable_DHCP_Show_SSID_WPA2_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+
+### Test case ID PFT-2601 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+Security(Auto select)+encryption(Auto select)+have static IP+Correct password+Auto connect+forget AP
+function PFT_2619_AP_with_WPA_WPA2_PSK_Disable_DHCP_Show_SSID_Security_Auto_select_encryption_Auto_select_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(connect_first_ssid enable_advances=true)" = "connect_first_ssid success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png,lan_proto=${DHCP_SERVER_DISABLE})" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops crypto_24g=${CRYPT_24G_AES},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test case ID PFT-2613 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+TKIP/WPA-PSK+AES/WPA2-PSK+TKIP/WPA2-PSK+AES/Security(Auto select)+encryption(Auto select)+Donot have static IP+Incorrect password+Auto connect+forget AP
+function PFT_2620_AP_with_WPA_WPA2_PSK_Disable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_have_static_IP_Incorrect_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network password='87654321',enable_advances=true)" = "add_network fail" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+  check ${FUNCNAME}
+}
+
+function  PFT_2621_Ap_with_WPA_WPA2_PSK_Disable_DHCP_Hide_SSID_WPA_PSK_TKIP_WPA_PSK_AES_WPA2_PSK_TKIP_WPA2_PSK_AES_Security_Auto_select_encryption_Auto_select_Manual_add_Donot_have_static_IP_Forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ]
+  [ "$(add_network)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops lan_proto=${DHCP_SERVER_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+
+function PFT_2622_AP_with_WPA_WPA2_PSK_Disable_DHCP_Hide_SSID_WPA_PSK_TKIP_have_static_IP_Correct_password+Auto_connect_forget_AP(){
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ] &&
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2598 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2623_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png,lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+### Test Case ID PFT-2610 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+TKIP+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2624_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_TKIP_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ] &&
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_TKIP},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}  
+
+### Test Case ID PFT-2600 AP with WPA/WPA2 PSK+Enable DHCP+Show SSID+WPA2-PSK+AES+ have static IP+Correct password+Auto connect+forget AP
+function PFT_2625_AP_with_WPA_WPA2_PSK_Enable_DHCP_Hide_SSID_WPA2_PSK_AES_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_discon.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${SECURT_MODE_WPA2},crypto_24g=${CRYPT_24G_AES},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_recon.png)" = "screen_captrue_ssid_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
+  check ${FUNCNAME}
+}
+
+
+### Test case ID PFT-2606 AP with WPA/WPA2 PSK+Enable DHCP+Hide SSID+Security(Auto select)+encryption(Auto select)+Donot have static IP+Correct password+Auto connect+forget AP
+function PFT_2626_AP_with_WPA_WPA2_PSK_Disable_DHCP_Hide_SSID_Security_Auto_select_encryption_Auto_select_have_static_IP_Correct_password_Auto_connect_forget_AP() {
+  work_tag ${FUNCNAME}
+
+  [ "$(clean_wifi_ops func=${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  
+  [ "$(set_ap_ops ssid_broadcast_24g=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE})" = "set_ap_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_hide.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(add_network enable_advances=true)" = "add_network success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_con.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(browser_ops http=${WEB_INDEX},png={FUNCNAME}_web.png})" = "browser_ops success" ]
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
+
   check ${FUNCNAME}
 }
 
@@ -1347,27 +1976,18 @@ function PFT_2627_Connect_AP_with_802_11_b_802_11_g_802_11_n() {
 
   [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA_WPA2},channel_width_24g=${CHANNEL_WIDTH_24},network_mode_24g=${NETWORK_MODE_B})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_b_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_b_con.png)" = "screen_captrue_ssid_ops success" ]
 
   [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA_WPA2},channel_width_24g=${CHANNEL_WIDTH_24},network_mode_24g=${NETWORK_MODE_G})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_g_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_g_con.png)" = "screen_captrue_ssid_ops success" ]
 
   [ "$(set_ap_ops security_mode_24g=${SECURT_MODE_WPA_WPA2},channel_width_24g=${CHANNEL_WIDTH_24},network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] && sleep 10s &&
-  [ "$(screen_captrue_ssid locate='head',png=${FUNCNAME}_n_con.png)" = "screen_captrue_ssid success" ]
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_n_con.png)" = "screen_captrue_ssid_ops success" ]
   check ${FUNCNAME}
 }
 
-###
-
-
-
-
-
-######################################################################################
-###Part 5 :    WEP
-######################################################################################
 ###Test Case ID PFT-2628 Modify AP with WEP manually
 function PFT_2628_Modify_ap_with_wep_manully() {
   echo " " >> ${OK_FAIL}
