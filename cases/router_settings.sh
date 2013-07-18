@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################################
-##Basic Wireless Settings: 
+##Basic Wireless Settings:
 ##Default:  
 ##5G Network Mode: mixed
 ##5G SSID: wlan_autotest_5G
@@ -30,10 +30,10 @@ function Basic_Wireless_Settings() {
   local ssid_broadcast_24g=${SSID_BROADCAST_ENABLE}
 
   [ "${arg}" != "" ] &&
-  for i in 1 2 3 4 5 6 7 8 9 10 11 12; do 
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
-    case $var in 
+    case $var in
     "network_mode_5g")
       network_mode_5g=${value}
       ;;
@@ -83,7 +83,7 @@ function Basic_Wireless_Settings() {
   if [ $? -eq 0 ] ; then
     echo "$FUNCNAME success"
   else
-    echo "$FUNCNAME fail"  
+    echo "$FUNCNAME fail"
   fi
 }
 
@@ -104,12 +104,13 @@ function Wireless_Security() {
 #wpa2     -- "CRYPT_24G_AES"
   local crypto_24g="tkip%2Baes"
   local crypto_5g="tkip%2Baes"
+  local encypt_wep='64'
 
   [ "${arg}" != "" ] &&
-  for i in 1 2 3 4 5 6; do 
+  for i in 1 2 3 4 5 6 7; do
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
-    case $var in 
+    case $var in
     "security_mode_24g")
       security_mode_24g=${value}
       ;;
@@ -127,6 +128,9 @@ function Wireless_Security() {
       ;;
     "crypto_5g")
       crypto_5g=${value}
+      ;;
+    "encypt_wep")
+      encypt_wep=${value}
       ;;
     esac
   done
@@ -151,7 +155,7 @@ function Wireless_Security() {
      local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=12345678&wsc_nwkey1=987654321&wl0_crypto=tkip&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=987654321&wl0_security_mode=wpa_enterprise&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=121&wl0_radius_port=1812&wl0_radius_key=12345678"
      ;;
    "${SECURT_MODE_WEP}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=1234567890&wsc_nwkey1=987654321&wl0_crypto=tkip&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=987654321&wl0_security_mode=wep&wl0_wep_bit=64&wl0_passphrase=&generateButton0=Null&wl0_key1=1234567890&wl0_WEP_key=&wl0_wep=restricted&wl0_key=1"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=987654321&wl0_crypto=tkip&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=987654321&wl0_security_mode=wep&wl0_wep_bit=${encypt_wep}&wl0_passphrase=&generateButton0=Null&wl0_key1=${passphrase_24g}&wl0_WEP_key=&wl0_wep=restricted&wl0_key=1"
      ;;
    "${SECURT_MODE_RADIUS}")
      local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=12345678&wsc_nwkey1=987654321&wl0_crypto=tkip&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=987654321&wl0_security_mode=radius&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=121&wl0_radius_port=1812&wl0_radius_key=12345678&wl0_wep_bit=64&wl0_passphrase=&generateButton0=Null&wl0_key2=1234567890&wl0_WEP_key=&wl0_wep=restricted&wl0_key=2"
@@ -165,7 +169,7 @@ function Wireless_Security() {
   if [ $? -eq 0 ] ; then
     echo "$FUNCNAME success"
   else
-    echo "$FUNCNAME fail"  
+    echo "$FUNCNAME fail"
   fi
 }
 
@@ -175,10 +179,10 @@ function Basic_Setup() {
   local lan_proto=${DHCP_SERVER_ENABLE}
 
   [ "${arg}" != "" ] &&
-  for i in 1; do 
+  for i in 1; do
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
-    case $var in 
+    case $var in
     "lan_proto")
       lan_proto=${value}
       ;;
@@ -199,22 +203,44 @@ function Basic_Setup() {
   if [ $? -eq 0 ] ; then
     echo "$FUNCNAME success"
   else
-    echo "$FUNCNAME fail"  
+    echo "$FUNCNAME fail"
   fi
 }
 
-######################################################################################################
-###
-######################################################################################################
-function Click_WiFi_Protected_Setup_Button() {
+function WiFi_Protected_Setup() {
+  local arg=$1
   local user="admin:admin"
-  local data="submit_button=Wireless_Basic&action=&commit=&pbutton=0&submit_type=wsc_method1&wsc_security_mode=&wsc_enr_pin=&change_action=gozila_cgi&next_page=Wireless_Basic.asp&wsc_result=3&wsc_guiresult=&wsc_barwidth=&wsc_smode=1&wsc_mode=0"
+  local wps_enable=false
+  local wps_button_tap=false
+  local wps_pin_num=""
+  local data=""
+
+  [ "${arg}" != "" ] &&
+  for i in 1 2 3 4 5; do
+    local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
+    local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
+    case $var in
+    "wps_enable")
+      wps_enable=${value}
+      ;;
+    "wps_button_tap")
+      wps_button_tap=${value}
+      ;;
+    "wps_pin_num")
+      wps_pin_num=${value}
+      ;;
+    esac
+  done
+  
+  if [ "${wps_enable}" = 'true' ] && [ "${wps_button_tap}" = 'true' ]; then
+    data="submit_button=Wireless_Basic&action=&commit=&pbutton=0&submit_type=wsc_method1&wsc_security_mode=&wsc_enr_pin=&change_action=gozila_cgi&next_page=Wireless_Basic.asp&wsc_result=3&wsc_guiresult=&wsc_barwidth=&wsc_smode=1&wsc_mode=0"
+  fi
 
   curl --user ${user} --data "${data}" http://192.168.1.1/apply.cgi > /dev/null
   if [ $? -eq 0 ] ; then
     echo "$FUNCNAME success"
   else
-    echo "$FUNCNAME fail"  
+    echo "$FUNCNAME fail"
   fi
 }
 
@@ -238,22 +264,25 @@ function set_ap_ops() {
   local passphrase_5g=${SSID_PASSWORD}
   local security_mode_24g=${SECURT_MODE_WPA_WPA2}
   local passphrase_24g=${SSID_PASSWORD}
-
+  local encypt_wep='64'
 #Basic Setup
   local lan_proto=${DHCP_SERVER_ENABLE}
 
 #WPS :
+  local wps_enable=false
+  local wps_button_tap=false
+  local wps_pin_num=""
 
 #others:
   local func=${FUNCNAME}
   local crypto_24g=${CRYPT_24G_MIXED}
   local crypto_5g=${CRYPT_5G_MIXED}
- 
+
   [ "${arg}" != "" ] &&
-  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19; do 
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23; do
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
-    case $var in 
+    case $var in
     "network_mode_5g")
       network_mode_5g=${value}
       ;;
@@ -308,8 +337,20 @@ function set_ap_ops() {
     "passphrase_24g")
       passphrase_24g=${value}
       ;;
+    "encypt_wep")
+      encypt_wep=${value}
+      ;;
     "lan_proto")
      lan_proto=${value}
+     ;;
+    "wps_enable")
+      wps_enable=${value}
+      ;;
+    "wps_button_tap")
+      wps_button_tap=${value}
+      ;;
+    "wps_pin_num")
+     wps_pin_num=${value}
      ;;
     "func")
      func=${value}
@@ -323,7 +364,7 @@ function set_ap_ops() {
 
   sleep 3s
 
-  if [ "$(Wireless_Security security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g},crypto_24g=${crypto_24g},crypto_5g=${crypto_5g})" = "Wireless_Security fail" ]; then
+  if [ "$(Wireless_Security security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g},crypto_24g=${crypto_24g},crypto_5g=${crypto_5g},encypt_wep=${encypt_wep})" = "Wireless_Security fail" ]; then
     echo "${FUNCNAME} fail"  &&  opt_fail ${func} && return
   fi
 
@@ -332,7 +373,12 @@ function set_ap_ops() {
   if [ "$(Basic_Setup lan_proto=${lan_proto})" = "Basic_Setup fail" ]; then
     echo "${FUNCNAME} fail" && opt_fail ${func} && return
   fi
-  echo "${FUNCNAME} success" 
+
+  if [ "$(WiFi_Protected_Setup wps_enable=${wps_enable},wps_button_tap=${wps_button_tap},wps_pin_num=${wps_pin_num})" = "WiFi_Protected_Setup fail" ]; then
+    echo "${FUNCNAME} fail" && opt_fail ${func} && return
+  fi
+
+  echo "${FUNCNAME} success"
 }
 
 #For debug

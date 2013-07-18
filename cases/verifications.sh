@@ -9,19 +9,19 @@ function adb_wpa_cli_ping() {
       break
     else
       [ "$i" = "2" ]  && echo "$FUNCNAME fail"
-    fi  
+    fi
   done
 }
 
 function pc_ping_ap(){
-  for((i=0; i<3; i++)); do  
+  for((i=0; i<3; i++)); do
     local res=`ping -c 3 -i 0.5 $PC_IP_ADDR | grep packet | awk -F ", " '{print $3}'`
     if [ "$res" = "0% packet loss" ] ; then
       echo "$FUNCNAME success"
       break
     else
       [ "$i" = "2" ] && echo "pc_ping_ap fail"
-    fi  
+    fi
   done
 }
 
@@ -59,13 +59,13 @@ function adb_screencap() {
   local pc_png_path="$(pwd)/results/png/${png_name}"
   local dut_png_path="/data/${png_name}"
 
-  adb -s ${DEVICES_MASTER} shell screencap ${dut_png_path} > /dev/null 
+  adb -s ${DEVICES_MASTER} shell screencap ${dut_png_path} > /dev/null
   sleep 3s
   adb -s ${DEVICES_MASTER} pull ${dut_png_path} ${pc_png_path} > /dev/null
 
-  if [ -e ${pc_png_path} ] ;then 
+  if [ -e ${pc_png_path} ] ;then
     echo "$FUNCNAME success"
-  else 
+  else
     echo "$FUNCNAME fail"
   fi
 }
