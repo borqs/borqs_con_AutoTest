@@ -591,9 +591,10 @@ function connect_first_ssid() {
 ##
 ###########################################################################################
 function forget_first_ssid() {
-  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
-    echo "${FUNCNAME} fail" && return
-  fi
+#  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
+#    echo "${FUNCNAME} fail" && return
+#  fi
+  [ "$(adb_rm src=${PUT_WPA_SUPPLICANT_CONF})" = "adb_rm fail" ] && echo "${FUNCNAME} fail" && return
   sleep 3s
   if [ "$(reopen_wifi)" = "reopen_wifi success" ]; then
     sleep 3s
@@ -610,9 +611,10 @@ function clean_wifi_ops() {
   local tag=$1
 #forget
   cursor_back_home
-  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
-    echo "${FUNCNAME} fail" && opt_fail ${tag} && return
-  fi
+  [ "$(adb_rm src=${PUT_WPA_SUPPLICANT_CONF})" = "adb_rm fail" ] && echo "${FUNCNAME} fail" && return
+#  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
+#    echo "${FUNCNAME} fail" && opt_fail ${tag} && return
+#  fi
 
 #close
   if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
@@ -867,8 +869,24 @@ function adb_push() {
   adb -s ${DEVICES_MASTER} push ${src} ${des} > /dev/null
   sleep 1s
 
-  check=`adb shell ls ${des} | grep "No such file"`
+  check=`adb -s ${DEVICES_MASTER} shell ls ${des} | grep "No such file"`
   [ "${check}" = "" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+}
+
+function adb_rm() {
+  local src=`echo $1 | grep "src=" | awk -F "=" '{ print $2 }'`
+
+  [ "${src}" = "" ] && echo "${FUNCNAME} fail" && return
+
+#If src file does not exist, just return
+  local est=`adb -s ${DEVICES_MASTER} shell ls ${src} | grep "No such file"`
+  [ "${est}" != "" ] && echo "${FUNCNAME} success" && return
+
+#That may really do what you want to
+  adb -s ${DEVICES_MASTER} root > /dev/null
+  adb -s ${DEVICES_MASTER} shell rm ${src} > /dev/null
+  local re_est=`adb -s ${DEVICES_MASTER} shell ls ${src} | grep "No such file"`
+  [ "${re_est}" != "" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
 }
 
 function pc_iperf_c() {
@@ -883,7 +901,7 @@ function pc_iperf_s() {
 
 function dut_iperf_c() {
   local tag=$1
-  local arr_rate_Mbit=(`adb shell iperf -c ${PC_IP_ADDR} -i 10 -t 30 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
+  local arr_rate_Mbit=(`adb -s ${DEVICES_MASTER} shell iperf -c ${PC_IP_ADDR} -i 10 -t 30 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
   [ "${arr_rate_Mbit[*]}" = "" ] && echo "$FUNCNAME fail" && return
   local len=${#arr_rate_Mbit[*]}
   local sum=0
@@ -902,7 +920,7 @@ function dut_iperf_c() {
 
 function dut_iperf_s() {
   local tag=$1
-  local arr_rate_Mbit=(`adb shell iperf -s -i 10 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
+  local arr_rate_Mbit=(`adb -s ${DEVICES_MASTER} shell iperf -s -i 10 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
   [ "${arr_rate_Mbit[*]}" = "" ] && echo "$FUNCNAME fail" && return
   local len=${#arr_rate_Mbit[*]}
   local sum=0
@@ -927,9 +945,9 @@ function pc_kill_9_iperf_s() {
 }
 
 function dut_kill_9_iperf_s() {
-  local pids=(`adb shell ps | grep "iperf" | awk '{ print $2 }'`)
+  local pids=(`adb -s ${DEVICES_MASTER} shell ps | grep "iperf" | awk '{ print $2 }'`)
   for pid in ${pids[*]}; do
-    adb shell kill -9 ${pid} > /dev/null
+    adb -s ${DEVICES_MASTER} shell kill -9 ${pid} > /dev/null
   done
 }
 
@@ -961,6 +979,7 @@ function DUT_Upload_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
   [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
   [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
   pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
 }
 
 function DUT_Download_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
@@ -984,16 +1003,18 @@ function DUT_Download_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
 
   [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_BG})" = "set_ap_ops fail" ] && return
 
-  [ "$(add_network func=${FUNCNAME},enable_advances=true)" = "add_network success" ] &&
-  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
-  [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
-  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s &&
+  if [ "$(add_network enable_advances=true)" = "add_network success" ] &&
+     [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
+     [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
+     [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s ;then
   {
     sleep 5s
     [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
   }&
-
   [ "$(dut_iperf_s $FUNCNAME)" = "dut_iperf_s success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  fi
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
 }
 
 function DUT_Upload_Data_Throughput_Network_80211A_RSSI_50_to_70() {
@@ -1024,6 +1045,7 @@ function DUT_Upload_Data_Throughput_Network_80211A_RSSI_50_to_70() {
   [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
   [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
   pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
 }
 
 function DUT_Download_Data_Throughput_Network_80211A_RSSI_50_to_70() {
@@ -1047,16 +1069,18 @@ function DUT_Download_Data_Throughput_Network_80211A_RSSI_50_to_70() {
 
   [ "$(set_ap_ops func=${FUNCNAME},network_mode_5g=${NETWORK_MODE_A})" = "set_ap_ops fail" ] && return
 
-  [ "$(add_network ssid=${SSID_5G},enable_advances=true)" = "add_network success" ] &&
-  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
-  [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
-  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s &&
+  if [ "$(add_network ssid=${SSID_5G},enable_advances=true)" = "add_network success" ] &&
+     [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
+     [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
+     [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s ;then
   {
     sleep 5s
     [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
   }&
-
   [ "$(dut_iperf_s $FUNCNAME)" = "dut_iperf_s success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  fi
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
 }
 
 function DUT_Upload_Data_Throughput_Network_80211N_RSSI_50_to_70() {
@@ -1087,6 +1111,7 @@ function DUT_Upload_Data_Throughput_Network_80211N_RSSI_50_to_70() {
   [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
   [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
   pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
 }
 
 function DUT_Download_Data_Throughput_Network_80211N_RSSI_50_to_70() {
@@ -1110,14 +1135,16 @@ function DUT_Download_Data_Throughput_Network_80211N_RSSI_50_to_70() {
 
   [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops fail" ] && return
 
-  [ "$(add_network enable_advances=true)" = "add_network success" ] &&
-  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
-  [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
-  [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s &&
+  if [ "$(add_network enable_advances=true)" = "add_network success" ] &&
+     [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
+     [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
+     [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s ; then
   {
     sleep 5s
     [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
   }&
-
   [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+  fi
+  pc_kill_9_iperf_s
+  dut_kill_9_iperf_s
 }

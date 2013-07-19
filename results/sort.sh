@@ -4,42 +4,50 @@
 ###eg: We need get TESTLINK ID PFT_2513 from file.
 ###/home/b734/auto_tester/workspace/results/png/PFT_2513_Manually_scan_available_AP_and_connect.png
 ##########################################################################################################
-function png_sort(){
-  local file_size=`ls $(pwd)/png/ -l | wc -l`
-  local cut_start=`expr length "$(pwd)/png/"`
-  local cut_end=`expr $cut_start + 8` 
-  local file_names=$(find $(pwd)/png/ -type f -name *.png -print)
-  local dir_names=$(find $(pwd)/png/ -type f -name *.png -print | cut -c $(expr ${cut_start} + 1)-${cut_end})
-  
-  for dir in ${dir_names} ;do 
-    for file in ${file_names} ; do
-      if [ "${file/${dir}/}" = "${file}" ]; then
-        continue
-      else
-        mkdir -p $(pwd)/cases_info/${dir}
-        cp -f ${file} $(pwd)/cases_info/${dir}
-      fi
-    done
+export CASES_INFO=$(pwd)/cases_info
+export DOWNLOAD=$(pwd)/download
+export LOG=$(pwd)/log.txt*
+export OK_FIAL=$(pwd)/OK_FAIL.txt*
+export PNG=$(pwd)/png
+export RT=$(pwd)/RT.txt*
+
+function PFT_XXXX_SORT(){
+  local count=`find ./ -type f -print | wc -l`
+  local files=`find ./ -type f -print`
+
+  echo "##################################################################"
+  echo "#  Files Count: ${count}                                         #"
+  echo "#  Cases Info Sort ...                                           #"
+  echo "##################################################################"
+
+  for file in ${files}; do
+    local loc_P=`echo ${file} | grep "PFT_" | expr index ${file} 'P'`
+    local cur_Dir=${file:${loc_P}:7}
+    if [ "${loc_P}" = "0" ]; then
+      continue
+    fi
+    mkdir -p ${CASES_INFO}/${cur_Dir}
+    cp  -fr ${file} ${CASES_INFO}/${cur_Dir}
   done
 
+  echo "##################################################################"
+  echo "# Case Info Sort Over                                            #"
+  echo "##################################################################"
 }
 
-function download_sort(){
-  local file_size=`ls $(pwd)/download/ -l | wc -l`
-  local cut_start=`expr length "$(pwd)/png/"`
-  local cut_end=`expr $cut_start + 13` 
-  local file_names=$(find $(pwd)/download/ -type f -name *.png -print)
-  local dir_names=$(find $(pwd)/download/ -type f -name *.png -print | cut -c $(expr ${cut_start} + 6)-${cut_end})
+function BASH_CLEAN() {
+  echo "##################################################################"
+  echo "#  Clean Last Test Info...                                       #"
+  echo "##################################################################"
 
-  for dir in ${dir_names} ;do 
-    for file in ${file_names} ; do
-      if [ "${file/${dir}/}" = "${file}" ]; then
-        continue
-      else
-        mkdir -p $(pwd)/cases_info/${dir}
-        cp -f ${file} $(pwd)/cases_info/${dir}
-      fi
-    done
-  done
+  rm -fr ${CASES_INFO}/*
+  rm -fr ${DOWNLOAD}/*
+  rm -fr ${LOG}
+  rm -fr ${OK_FIAL}
+  rm -fr ${PNG}/*
+  rm -fr ${RT}
 
+  echo "##################################################################"
+  echo "#  Clean Last Test Info Over                                     #"
+  echo "##################################################################"
 }

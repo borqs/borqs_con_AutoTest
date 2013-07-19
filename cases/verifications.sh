@@ -25,7 +25,6 @@ function pc_ping_ap(){
   done
 }
 
-
 function adb_ping(){
   for((i=0; i<3; i++)); do
     local res=`adb -s ${DEVICES_MASTER} shell ping -c 2 -i 0.5 $AP_IP_ADDR | grep packet |awk -F ", " '{print $3}'`
@@ -38,22 +37,20 @@ function adb_ping(){
   done
 }
 
-
 function adb_wpa_cli_bssid_status(){
   local bssid=${BSSID}
-  sleep 10s
-  local res=`adb -s ${DEVICES_MASTER} shell wpa_cli status | grep bssid | awk -F "=" '{print substr($2,1,17)}'`
-  if [ "$res" = "$bssid" ] ; then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
-  fi
+  sleep 15s
+  for i in 1 2 3; do
+    local cur_bssid=`adb -s ${DEVICES_MASTER} shell wpa_cli status | grep bssid | awk -F "=" '{print substr($2,1,17)}'`
+    local state=`adb -s ${DEVICES_MASTER} shell wpa_cli status | grep wpa_state | awk -F "=" '{print substr($2,1,9)}'`
+    if [ "${cur_bssid}" = "${bssid}" ] && [ "${state}" = "COMPLETED" ]; then
+      echo "$FUNCNAME success" && return
+    fi
+    sleep 10s
+  done
+  echo "${FUNCNAME} fail"
 }
 
-
-###################################################################################################
-## eg: adb_screencap png=0_0.png
-###################################################################################################
 function adb_screencap() {
   local png_name=`echo $1 | grep "png" | awk -F "=" '{print $2}'`
   local pc_png_path="$(pwd)/results/png/${png_name}"
@@ -63,10 +60,5 @@ function adb_screencap() {
   sleep 3s
   adb -s ${DEVICES_MASTER} pull ${dut_png_path} ${pc_png_path} > /dev/null
 
-  if [ -e ${pc_png_path} ] ;then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
-  fi
+  [ -e ${pc_png_path} ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
 }
-

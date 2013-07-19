@@ -137,16 +137,16 @@ function Wireless_Security() {
 
  case ${security_mode_24g} in
    "${SECURT_MODE_WPA_WPA2}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip%2Baes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip%2Baes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=wpa2_personal&wl0_wpa_psk=${passphrase_24g}"
      ;;
    "${SECURT_MODE_WPA2_PERSONAL}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=aes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=aes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=wpa2_personal&wl0_wpa_psk=${passphrase_24g}"
      ;;
    "${SECURT_MODE_WPA_PERSONAL}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_wpa_psk=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=wpa_personal&wl0_wpa_psk=${passphrase_24g}"
      ;;
    "${SECURT_MODE_ENTERPRISE_MIXED_MODE}")
-     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip%2Baes&wl1_crypto=tkip%2Baes%2Baes&wsc_security_auto=0&wl1_security_mode=${security_mode_5g}&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=${security_mode_24g}&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=120&wl0_radius_port=1812&wl0_radius_key=${passphrase_24g}"
+     local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=${passphrase_24g}&wsc_nwkey1=${passphrase_5g}&wl0_crypto=tkip%2Baes&wl1_crypto=tkip%2Baes%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=${passphrase_5g}&wl0_security_mode=wpa2_personal&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=120&wl0_radius_port=1812&wl0_radius_key=${passphrase_24g}"
      ;;
    "${SECURT_MODE_WPA2_ENTERPRISE}")
      local data="submit_button=WL_WPATable&change_action=&submit_type=&action=Apply&security_mode_last=&wl_wep_last=&wait_time=3&wsc_nwkey0=12345678&wsc_nwkey1=987654321&wl0_crypto=aes&wl1_crypto=tkip%2Baes&wsc_security_auto=0&wl1_security_mode=wpa2_personal&wl1_wpa_psk=987654321&wl0_security_mode=wpa2_enterprise&wl0_radius_ipaddr=4&wl0_radius_ipaddr_0=192&wl0_radius_ipaddr_1=168&wl0_radius_ipaddr_2=1&wl0_radius_ipaddr_3=121&wl0_radius_port=1812&wl0_radius_key=12345678"
@@ -377,6 +377,8 @@ function set_ap_ops() {
   if [ "$(WiFi_Protected_Setup wps_enable=${wps_enable},wps_button_tap=${wps_button_tap},wps_pin_num=${wps_pin_num})" = "WiFi_Protected_Setup fail" ]; then
     echo "${FUNCNAME} fail" && opt_fail ${func} && return
   fi
+
+  sleep 10s
 
   echo "${FUNCNAME} success"
 }

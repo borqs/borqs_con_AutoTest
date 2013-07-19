@@ -34,10 +34,10 @@ export SSID_BROADCAST_ENABLE="0"
 export SSID_BROADCAST_DISENABLE="1"
 #--------------------------------------------------------------------------------------
 export BSSID="58:6d:8f:85:cf:56"
-export SECURT_MODE_WPA_WPA2="wpa2_personal"
+export SECURT_MODE_WPA_WPA2="wpa_wpa2"
 export SECURT_MODE_WPA_PERSONAL="wpa_personal"
 export SECURT_MODE_WPA2_PERSONAL="wpa2_personal"
-export SECURT_MODE_ENTERPRISE_MIXED_MODE="wpa2_enterprise"
+export SECURT_MODE_ENTERPRISE_MIXED_MODE="enterprise_mixed"
 export SECURT_MODE_WPA_ENTERPRISE="wpa_enterprise"
 export SECURT_MODE_WPA2_ENTERPRISE="wpa2_enterprise"
 export SECURT_MODE_WEP="wep"
@@ -87,10 +87,11 @@ source $(pwd)/cases/verifications.sh
 #####################################################################################
 ###Clean last test results
 ######################################################################################
-#[ -e ${OK_FAIL} ] && rm ${OK_FAIL} && echo "${OK_FAIL} clean"
-#[ -e ${PC_DOWNLOAD_DIR}/* ] && rm -rf ${PC_DOWNLOAD_DIR}/* && echo "${PC_DOWNLOAD_DIR}/* clean"
-#[ -e ${PNG}/* ] && rm -rf ${PNG}/* && echo "${PNG}/* clean"
-#[ -e ${CASE_INFO}/* ] && rm -rf ${CASE_INFO}/* && echo "${CASE_INFO}/* clean"
+mkdir -p ${PC_DOWNLOAD_DIR}
+mkdir -p ${PNG}
+mkdir -p ${CASE_INFO}
+source $(pwd)/results/sort.sh
+BASH_CLEAN
 
 ######################################################################################
 ###Here are the cases, which could be set enable or disable in config.txt file
@@ -403,7 +404,7 @@ function PFT_2537_Show_AP_signal_strength_SSID_security_type_of_scanned_network_
   [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WEP})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_wep.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_80211x_EAP})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate-'first',png=${FUNCNAME}_eap.png)" = "screen_captrue_ssid_ops success" ]
 
   check ${FUNCNAME}
@@ -420,7 +421,7 @@ function PFT_2538_Show_different_security_type_and_Signal_strength_for_AP() {
   [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WEP})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_wep.png)" = "screen_captrue_ssid_ops success" ]
 
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_80211x_EAP})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='first',png=${FUNCNAME}_80211eap.png)" = "screen_captrue_ssid_ops success" ]
 
   check ${FUNCNAME}
@@ -432,11 +433,11 @@ function PFT_2539_Support_show_password_option_when_input_password() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
 
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
-  [ "$(connect_first_ssid show_password=true,png=${FUNCNAME}_con.png)" = "connect_first_ssid success" ]
+  [ "$(connect_first_ssid show_password=true,show_password_png=${FUNCNAME}_con.png)" = "connect_first_ssid success" ]
 
   [ "$(add_network mode=${SECURT_MODE_WEP},password=${SECURT_MODE_WEP},show_password=true,show_password_png=${FUNCNAME}_pw_wep.png)" = "add_network success" ]
   [ "$(add_network mode=${SECURT_MODE_WPA_WPA2},show_password=true,show_password_png=${FUNCNAME}_pw_wpa2.png)" = "add_network success" ]
-  [ "$(add_network mode=${SECURT_MODE_80211x_EAP},show_password=true,show_password_png=${FUNCNAME}_pw_eap.png)" = "add_network success" ]
+  [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},show_password=true,show_password_png=${FUNCNAME}_pw_eap.png)" = "add_network success" ]
 
   check ${FUNCNAME}
 }
@@ -510,7 +511,7 @@ function PFT_2544_Cannot_connect_AP_successfully_with_wrong_password() {
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_wpa2_discon_len_9.png)" = "screen_captrue_ssid_ops success" ]
   }
 
-  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_80211x_EAP})" = "set_ap_ops success" ] && {
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] && {
     [ "$(connect_first_ssid password=87654321)" = "connect_first_ssid fail" ] && sleep 10s &&
     [ "$(screen_captrue_ssid_ops png=${FUNCNAME}_eap_discon_len_10.png)" = "screen_captrue_ssid_ops success" ]
 
@@ -571,14 +572,14 @@ function PFT_2553_WiFi_throughput_test() {
   work_tag ${FUNCNAME}
 
   for i in 1 2 3 ;do
-    DUT_Upload_Data_Throughput_Network_80211BG_RSSI_50_to_70
-    DUT_Download_Data_Throughput_Network_80211BG_RSSI_50_to_70
+    DUT_Upload_Data_Throughput_Network_80211BG_RSSI_50_to_70 png=${FUNCNAME}_bg_50_70_up_${i}.png
+    DUT_Download_Data_Throughput_Network_80211BG_RSSI_50_to_70 png=${FUNCNAME}_bg_50_70_down_{i}.png
 
-    DUT_Upload_Data_Throughput_Network_80211A_RSSI_50_to_70
-    DUT_Download_Data_Throughput_Network_80211A_RSSI_50_to_70
+    DUT_Upload_Data_Throughput_Network_80211A_RSSI_50_to_70 png=${FUNCNAME}_a_50_70_up_${i}.png
+    DUT_Download_Data_Throughput_Network_80211A_RSSI_50_to_70 png=${FUNCNAME}_a_50_70_down_${i}.png
 
-    DUT_Upload_Data_Throughput_Network_80211N_RSSI_50_to_70
-    DUT_Download_Data_Throughput_Network_80211N_RSSI_50_to_70
+    DUT_Upload_Data_Throughput_Network_80211N_RSSI_50_to_70 png=${FUNCNAME}_n_50_70_${i}_up.png
+    DUT_Download_Data_Throughput_Network_80211N_RSSI_50_to_70 png=${FUNCNAME}_n_50_70_${i}_down.png
   done
 
   check ${FUNCNAME}
@@ -638,7 +639,7 @@ function PFT_2557_Support_add_use_configured_AP_with_None_WEP_WPA2_802_11x_EAP()
   [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_wep.png)" = "screen_captrue_ssid_ops success" ]
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
-  [ "$(add_network mode=${SECURT_MODE_80211x_EAP},ssid='PFT_2557_EAP')" = "add_network success" ] &&
+  [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},ssid='PFT_2557_EAP')" = "add_network success" ] &&
   [ "$(screen_captrue_ssid_ops locate='last',png=${FUNCNAME}_eap.png)" = "screen_captrue_ssid_ops success" ]
 
   check ${FUNCNAME}
