@@ -112,6 +112,30 @@ function input_text() {
   adb -s ${DEVICES_MASTER} shell input text "$1"
 }
 
+##eap_method: TLS/TTLS/PEAP
+##phase2: PAP/MSCHAP/MSCHAPV2/GTC
+function pick_method_phase2() {
+  local method_num=$1
+  local phase2_num=$2
+
+  cursor_click
+
+  #pick method
+  for((i=0; i<${method_num}-1; i++)); do
+    cursor_down
+  done
+  cursor_click
+
+  cursor_down
+  cursor_click
+
+  #pick phase2
+  for((i=0; i<${phase2_num}; i++)); do
+    cursor_down
+  done
+  cursor_click
+}
+
 #################################################################################
 ##basic operations: open wifi, close wifi.
 #################################################################################
@@ -238,6 +262,10 @@ function add_network() {
   local show_mode=false
   local show_mode_png="${FUNCNAME}_mode.png"
   local password=${SSID_PASSWORD}
+  local method=${PEAP}
+  local phase2=${NONE}
+  local identity=${IDENTITY}
+  local eap_user_password=${EAP_USER_PASSWORD}
   local show_password=false
   local show_password_png="${FUNCNAME}_password.png"
   local show_advances=false
@@ -264,6 +292,15 @@ function add_network() {
       ;;
     "password")
       password=${value}
+      ;;
+    "method")
+      method=${value}
+      ;;
+    "phase2")
+      phase2=${value}
+      ;;
+    "eap_user_password")
+      eap_user_password=${value}
       ;;
     "show_password")
       show_password=${value}
@@ -342,13 +379,35 @@ function add_network() {
       input_text ${password}
    }
    fi
-  elif [ "${mode}" = "${SECURT_MODE_ENTERPRISE_MIXED_MODE}" ]; then
+  elif [ ${mode/"enterprise"//} != $mode ]; then
     cursor_down_rel 3
     if [ "${show_mode}" = "true" ]; then
       [ "$(adb_screencap png=${show_mode_png})" = "adb_screencap fail" ] && cursor_back && echo "${FUNCNAME} fail" && return
     fi
     cursor_click
-    ##Do for EAP#
+    cursor_down
+
+    #pick eap method and phase2
+    pick_method_phase2 ${method} ${phase2}
+
+    cursor_down
+    #CA certificate
+    cursor_click
+    cursor_down
+    cursor_click
+
+    cursor_down
+    #User certificate
+    cursor_click
+    cursor_down
+    cursor_click
+
+    cursor_down
+    #identity
+    input_text ${identity}
+    cursor_down
+    cursor_down
+    input_text ${eap_user_password}
   fi
     sleep 1s
 
@@ -497,6 +556,10 @@ function connect_first_ssid() {
   local arg=$1
   local mode=${SECURT_MODE_WPA_WPA2}
   local password=${SSID_PASSWORD}
+  local method=${PEAP}
+  local phase2=${NONE}
+  local identity=${IDENTITY}
+  local eap_user_password=${EAP_USER_PASSWORD}
   local show_password="false"
   local show_password_png="${FUNCNAME}_password.png"
   local show_advances="false"
@@ -514,6 +577,15 @@ function connect_first_ssid() {
       ;;
     "password")
       password=${value}
+      ;;
+    "method")
+      method=${value}
+      ;;
+    "phase2")
+      phase2=${value}
+      ;;
+    "eap_user_password")
+      eap_user_password=${value}
       ;;
     "show_password")
       show_password=${value}
@@ -560,9 +632,31 @@ function connect_first_ssid() {
   elif [ "${mode}" = "${SECURT_MODE_WPA_WPA2}" ]; then
     cursor_click
     input_text ${password}
-  elif [ "${mode}" = "${SECURT_MODE_ENTERPRISE_MIXED_MODE}" ]; then
+  elif [ ${mode/"enterprise"//} != $mode ]; then
     cursor_click
-    ##Do for EAP#
+
+    cursor_go 0
+    #pick eap method and phase2
+    pick_method_phase2 ${method} ${phase2}
+
+    cursor_down
+    #CA certificate
+    cursor_click
+    cursor_down
+    cursor_click
+
+    cursor_down
+    #User certificate
+    cursor_click
+    cursor_down
+    cursor_click
+
+    cursor_down
+    #identity
+    input_text ${identity}
+    cursor_down
+    cursor_down
+    input_text ${eap_user_password}
   fi
   sleep 1s
 

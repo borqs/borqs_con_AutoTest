@@ -56,6 +56,21 @@ export CRYPT_5G_AES="aes"
 export SSID_PASSWORD="12345678"
 export SSID_PASSWORD_WEP="1234567890"
 export SSID_PASSWORD_WEP_128="12345678901234567890123456"
+
+##Below only for 802.1x option
+#--------------------------------------------------------------------------------------
+export PEAP="1"
+export TLS="2"
+export TTLS="3"
+export NONE="0"
+export PAP="1"
+export MSCHAP="2"
+export MSCHAPV2="3"
+export GTC="4"
+export IDENTITY="test"
+export EAP_USER_PASSWORD="test"
+export EAP_USER_PASSWORD_WRONG="test0"
+
 #--------------------------------------------------------------------------------------
 export DHCP_SERVER_DISABLE="static"
 export DHCP_SERVER_ENABLE="dhcp"
@@ -1976,6 +1991,548 @@ function PFT_2636_Ap_with_WEP_ASCII_open_authentication_mode_Disable_DHCP_Show_S
   [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
   [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ]
 
+  check ${FUNCNAME}
+}
+
+function PFT_2667_Configuration_Mixed_Enterprise_Mode_Environment() {
+  echo " " >> ${OK_FAIL}
+  echo "$FUNCNAME [MANUAL]" >> ${OK_FAIL}
+}
+
+function PFT_2668_Add_AP_Mixed_Enterprise_Manually_Forget_AP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2669_Edhcp_Sssid_WPA_TKIP_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops fail" ] && return
+  sleep 10s
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return
+  sleep 10s
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2670_Edhcp_Sssid_WPA_AES_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2671_Edhcp_Sssid_WPA2_TKIP_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2672_Edhcp_Sssid_WPA2_AES_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA2_ENTERPRISE})" = "connect_first_ssid fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops fail" ] && return || sleep 10s
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return  || sleep 10s
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2673_Edhcp_Sssid_WPA_WPA2_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "connect_first_ssid fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops fail" ] && return || sleep 10s
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return  || sleep 10s
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2674_Edhcp_Sssid_WPA_WPA2_TKIP_AES_NoStatic_WrongPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},eap_user_password=${EAP_USER_PASSWORD_WRONG})" = "connect_first_ssid fail" ] && return
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_wrong_password_head.png)" = "screen_captrue_ssid_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+
+function PFT_2675_Edhcp_Sssid_WPA_TKIP_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},enable_advances=true)" = "connect_first_ssid fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2676_Edhcp_Sssid_WPA_AES_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+
+n PFT_2677_Edhcp_Sssid_WPA2_TKIP_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2678_Edhcp_Sssid_WPA2_AES_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA2_ENTERPRISE},enable_advances=true)" = "connect_first_ssid fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2679_Edhcp_Sssid_WPA_WPA2_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},enable_advances=true)" = "connect_first_ssid fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2680_Edhcp_Hssid_WPA_TKIP_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return
+
+  [ "$(open_wifi)" = "open_wifi" ] && sleep 5s && [ "$(adb_screencap png=${FUNCNAME}_verify_HSSID.png)" = "adb_screencap fail" ] && return
+  [ "$(add_network mode=${SECURT_MODE_WPA_ENTERPRISE})" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2681_Edhcp_Hssid_WPA_AES_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2682_Edhcp_Hssid_WPA2_TKIP_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2683_Edhcp_Hssid_WPA2_AES_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return
+
+  [ "$(open_wifi)" = "open_wifi" ] && sleep 5s && [ "$(adb_screencap png=${FUNCNAME}_verify_HSSID.png)" = "adb_screencap fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_WPA2_ENTERPRISE})" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2684_Edhcp_Hssid_WPA_WPA2_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(open_wifi)" = "open_wifi" ] && sleep 5s && [ "$(adb_screencap png=${FUNCNAME}_verify_HSSID.png)" = "adb_screencap fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2685_Edhcp_Hssid_WPA_WPA2_TKIP_AES_NoStatic_WrongPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},eap_user_password=${EAP_USER_PASSWORD_WRONG})" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] && return
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_wrong_password_head.png)" = "screen_captrue_ssid_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2686_Ddhcp_Sssid_WPA_WPA2_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "connect_first_ssid success" ] && return
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_noStaticIP_head.png)" = "screen_captrue_ssid_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+
+function PFT_2687_Ddhcp_Sssid_WPA_TKIP_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},enable_advances=true)" = "connect_first_ssid fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2688_Ddhcp_Sssid_WPA_AES_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2689_Ddhcp_Sssid_WPA2_TKIP_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2690_Ddhcp_Sssid_WPA2_AES_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA2_ENTERPRISE},enable_advances=true)" = "connect_first_ssid fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2691_Ddhcp_Sssid_WPA_WPA2_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},enable_advances=true)" = "connect_first_ssid fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2692_Ddhcp_Sssid_WPA_WPA2_TKIP_AES_Static_WrongPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},enable_advances=true,eap_user_password=${EAP_USER_PASSWORD_WRONG})" = "connect_first_ssid success" ] && return
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_wrong_password_head.png)" = "screen_captrue_ssid_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2693_Ddhcp_Hssid_WPA_WPA2_TKIP_AES_NoStatic_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] && return
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_noStaticIP_head.png)" = "screen_captrue_ssid_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+
+function PFT_2694_Ddhcp_Hssid_WPA_TKIP_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_WPA_ENTERPRISE},enable_advances=true)" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2695_Ddhcp_Hssid_WPA_AES_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2696_Ddhcp_Hssid_WPA2_TKIP_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  echo "Unsupported by cisco AP" >> ${OK_FAIL}
+}
+
+function PFT_2697_Ddhcp_Hssid_WPA2_AES_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_WPA2_ENTERPRISE},enable_advances=true)" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2698_Ddhcp_Hssid_WPA_WPA2_Static_CorrectPWD_ForgetAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return
+
+  [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},enable_advances=true)" = "add_network fail" ] && return
+  [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && return
+  [ "$(browser_ops http=${WEB_INDEX},png=${FUNCNAME}.png)" = "browser_ops fail" ] && return
+
+  [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_forget_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(set_ap_ops network_mode_24g=${NETWORK_MODE_DISABLE})" = "set_ap_ops success" ] && sleep 10s &&
+  [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_dis_head.png)" = "screen_captrue_ssid_ops success" ] &&
+  [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
+  check ${FUNCNAME}
+}
+
+function PFT_2699_Connect_AP_with_b_g_n_bg_bgn() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_B})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid fail" ] && return
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_G})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid fail" ] && return
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid fail" ] && return
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_BG})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid fail" ] && return
+
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_MIXED})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid fail" ] && return
+
+  check ${FUNCNAME}
+}
+
+function PFT_2700_Connect_AP_with_TTLS_PAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TTLS},phase2=${PAP})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2701_Connect_AP_with_TLS_GTC() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TLS},phase2=${GTC})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2702_Connect_AP_with_PEAP_PAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${PEAP},phase2=${PAP})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2703_Connect_AP_with_TLS_MSCHAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TLS},phase2=${MSCHAP})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2704_Connect_AP_with_PEAP_GTC() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${PEAP},phase2=${GTC})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2705_Connect_AP_with_PEAP_MSCHAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${PEAP},phase2=${MSCHAP})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2706_Connect_AP_with_PEAP_MSCHAPV2() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${PEAP},phase2=${MSCHAPV2})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2707_Connect_AP_with_TLS_PAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TLS},phase2=${PAP})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2708_Connect_AP_with_TLS_MSCHAPV2() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TLS},phase2=${MSCHAPV2})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2709_Connect_AP_with_TTLS_MSCHAP() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TTLS},phase2=${MSCHAP})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2711_Connect_AP_with_TTLS_GTC() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TTLS},phase2=${GTC})" = "connect_first_ssid fail" ] && return
+  check ${FUNCNAME}
+}
+
+function PFT_2712_Connect_AP_with_TTLS_MSCHAPV2() {
+  work_tag ${FUNCNAME}
+  [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops fail" ] && return
+  [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE},method=${TTLS},phase2=${MSCHAPV2})" = "connect_first_ssid fail" ] && return
   check ${FUNCNAME}
 }
 
