@@ -274,7 +274,7 @@ function add_network() {
   local ip_address=${PUT_IP_ADDR}
 
   [ "${arg}" != "" ] &&
-  for i in 1 2 3 4 5 6 7 8 9 10 11; do
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14; do
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
     case $var in
@@ -568,7 +568,7 @@ function connect_first_ssid() {
   local ip_address="${PUT_IP_ADDR}"
 
   [ "${arg}" != "" ] &&
-  for i in 1 2 3 4 5 6 7 8; do
+  for i in 1 2 3 4 5 6 7 8 9 10 11; do
     local var=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $1} '`
     local value=`echo $arg | awk -F "," '{ print $"'"$i"'" }' | awk -F "=" '{ print $2} '`
     case $var in
@@ -822,7 +822,10 @@ function airplane_ops() {
 
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.AIRPLANE_MODE_SETTINGS > /dev/null
-  cursor_go 1
+  [ "PUT_TYPE" = "phone" ] && cursor_go 1 || {
+  cursor_right
+  cursor_go 0
+  }
   cursor_click
 
   select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`

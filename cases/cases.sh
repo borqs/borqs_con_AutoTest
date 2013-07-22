@@ -7,16 +7,21 @@
 #-------------------------------------------------------------------------------------
 #1. You should replace these files(in prepared direction) to adapt your productions
 #2. Keep your PC ip address as ${PC_IP_ADDR}
-#3. Modify below value
+#3. 3. Set Default browser, Maybe there are more than one browsers to choose from. You can "adb shell am start -a android.intent.action.VIEW -d  http://www.baidu.com" and pick up one as default
+#4. Modify below value
 export DEVICES_MASTER="CLVCE498A8D"
 export DEVICES_SLAVE=""
 export WIRELESS_NETWORK_WIFI_X_Y="150 150"
-#For Nebula export WIRELESS_NETWORK_WIFI_X_Y="300 190"
 export WPS_PIN_X_Y="600 50"
 export ADD_NETWORK_X_Y="700 50"
-#for Nebula export ADD_NETWORK_X_Y="435 765"
 export PUT_TYPE="table"
-#export PUT_TYPE="phone"
+##For Nebual {
+  #export PUT_TYPE="phone"
+  #export WIRELESS_NETWORK_WIFI_X_Y="300 190"
+  #export ADD_NETWORK_X_Y="435 765"
+#}
+export PC_IPERF="$(pwd)/prepared/bin/iperf_x86"
+export PC_CURL="$(pwd)/prepared/bin/curl_x86"
 ##For AP
 #--------------------------------------------------------------------------------------
 export NETWORK_MODE_DISABLE="disabled"
@@ -86,13 +91,13 @@ export PC_DOWNLOAD_DIR="$(pwd)/results/download"
 export PNG="$(pwd)/results/png"
 export PC_WPA_SUPPLICANT_CONF="$(pwd)/prepared/wpa_supplicant.conf"
 export PUT_WPA_SUPPLICANT_CONF="/data/misc/wifi/wpa_supplicant.conf"
-export PC_CURL="$(pwd)/prepared/bin/curl"
 export PUT_CURL="/system/bin/curl"
-export PC_IPERF="$(pwd)/prepared/bin/iperf_arm"
 export PUT_IPERF="/system/bin/iperf"
 export OK_FAIL="$(pwd)/results/OK_FAIL.txt"
 export DATA_THROUGHPUT="$(pwd)/results/RT.txt"
 export CASE_INFO="$(pwd)/results/cases_info"
+export PC_LOG="$(pwd)/results/*log.txt*"
+export PC_RT="$(pwd)/results/*RT.txt*"
 
 ######################################################################################
 ###dut_operations.sh   :     do operations in DUT part
@@ -102,14 +107,11 @@ export CASE_INFO="$(pwd)/results/cases_info"
 source $(pwd)/cases/PUT_operations.sh
 source $(pwd)/cases/router_settings.sh
 source $(pwd)/cases/verifications.sh
+source $(pwd)/cases/logs_about.sh
 
 #####################################################################################
 ###Clean last test results
 ######################################################################################
-mkdir -p ${PC_DOWNLOAD_DIR}
-mkdir -p ${PNG}
-mkdir -p ${CASE_INFO}
-source $(pwd)/results/sort.sh
 BASH_CLEAN
 
 ######################################################################################
@@ -229,7 +231,7 @@ function PFT_2521_Download_a_file_when_connect_to_available_AP() {
   [ "$(set_ap_ops func=${FUNCNAME})" = "set_ap_ops fail" ] && return
 
   [ "$(connect_first_ssid)" = "connect_first_ssid success" ] &&
-  [ "$(browser_ops http=${WEB_DOWNLOAD_MP3},name=${FUNCNAME}.mp3)" = "download_data_via_browser success" ] &&
+  [ "$(browser_ops http=${WEB_DOWNLOAD_MP3},name=${FUNCNAME}.mp3)" = "browser_ops success" ] &&
   check ${FUNCNAME}
 }
 
@@ -572,7 +574,7 @@ function PFT_2551_AP_channel_1_13() {
   [ "$(master_clear)" = "master_clear success" ] && {
     for i in 1 2 3 4 5 6 7 8 9 10 11 12 13; do
       [ "$(set_ap_ops func=${FUNCNAME},channel_24g=${i})" = "set_ap_ops success" ] &&
-      [ "$(clean_wifi_operations)" = "clean_wifi_operations success" ] &&
+      [ "$(clean_wifi_ops)" = "clean_wifi_ops success" ] &&
       [ "$(connect_first_ssid)" = "connect_first_ssid success" ] &&
       [ "$(screen_captrue_ssid_ops ${FUNCNAME}_${i}.png)" = "screen_captrue_ssid_ops success" ]
     done
@@ -2125,7 +2127,7 @@ function PFT_2676_Edhcp_Sssid_WPA_AES_Static_CorrectPWD_ForgetAP() {
 }
 
 
-n PFT_2677_Edhcp_Sssid_WPA2_TKIP_Static_CorrectPWD_ForgetAP() {
+function PFT_2677_Edhcp_Sssid_WPA2_TKIP_Static_CorrectPWD_ForgetAP() {
   work_tag ${FUNCNAME}
   echo "Unsupported by cisco AP" >> ${OK_FAIL}
 }
