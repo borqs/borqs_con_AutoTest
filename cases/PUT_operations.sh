@@ -115,6 +115,7 @@ function input_text() {
 #################################################################################
 ##basic operations: open wifi, close wifi.
 #################################################################################
+[ "{PUT_TYPE}" = "phone" ] &&
 function open_wifi() {
 #from home start settings
   cursor_back_home
@@ -133,11 +134,23 @@ function open_wifi() {
   sleep 3s
 
 #check
-  if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
-    echo "$FUNCNAME success"
-  else
-    echo "$FUNCNAME fail"
-  fi
+  [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+} ||
+function open_wifi() {
+#from home start settings
+  cursor_back_home
+  adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
+  sleep 1s
+
+#open wifi
+  for i in 1 2 3 ; do
+    adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
+    sleep 2s
+    [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] &&
+    echo "$FUNCNAME success"&& cursor_click && return
+  done
+
+  echo "$FUNCNAME fail"
 }
 
 
@@ -156,6 +169,7 @@ function open_wifi_directly() {
   echo "$FUNCNAME fail"
 }
 
+[ "{PUT_TYPE}" = "phone" ] &&
 function close_wifi() {
 #from home to wifi settting
   cursor_back_home
@@ -174,6 +188,19 @@ function close_wifi() {
   else
     echo "$FUNCNAME fail"
   fi
+} ||
+function close_wifi() {
+  cursor_back_home
+  adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
+
+  for i in 1 2 3 ; do
+    adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
+    sleep 2s
+    [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ] &&
+    echo "$FUNCNAME success" && cursor_click && return
+  done
+
+  echo "$FUNCNAME fail"
 }
 
 ##Close WiFi from WIRELESS & NETWORKS interface
@@ -292,7 +319,14 @@ function add_network() {
     fi
     cursor_click
     cursor_down
-    input_text ${password}
+    if [ "${PUT_TYPE}" = "phone" ]; then {
+      input_text ${password}
+    } else {
+      # It is a BUG for CLT 7.85
+      cursor_up
+      input_text ${password}
+   }
+   fi
   elif [ "${mode}" = "${SECURT_MODE_WPA_WPA2}" ]; then
     cursor_down_rel 2
     if [ "${show_mode}" = "true" ]; then
@@ -300,7 +334,14 @@ function add_network() {
     fi
     cursor_click
     cursor_down
-    input_text ${password}
+    if [ "${PUT_TYPE}" = "phone" ]; then {
+      input_text ${password}
+    } else {
+      # It is a BUG for CLT 7.85
+      cursor_up
+      input_text ${password}
+   }
+   fi
   elif [ "${mode}" = "${SECURT_MODE_ENTERPRISE_MIXED_MODE}" ]; then
     cursor_down_rel 3
     if [ "${show_mode}" = "true" ]; then
@@ -387,9 +428,7 @@ function wps_pin_tap() {
   fi
 
 #open && scan
-  reset_cursor_to_bottom_20
-  cursor_left
-  cursor_click
+  adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WPS_PIN_X_Y}
   sleep 3s
   echo "$FUNCNAME success"
 }

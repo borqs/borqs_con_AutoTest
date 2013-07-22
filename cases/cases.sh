@@ -8,11 +8,15 @@
 #1. You should replace these files(in prepared direction) to adapt your productions
 #2. Keep your PC ip address as ${PC_IP_ADDR}
 #3. Modify below value
-export DEVICES_MASTER="45010053454d30384790061f1a2230ab"
+export DEVICES_MASTER="CLVCE498A8D"
 export DEVICES_SLAVE=""
-export WIRELESS_NETWORK_WIFI_X_Y="300 190"
-export ADD_NETWORK_X_Y="435 765"
-
+export WIRELESS_NETWORK_WIFI_X_Y="150 150"
+#For Nebula export WIRELESS_NETWORK_WIFI_X_Y="300 190"
+export WPS_PIN_X_Y="600 50"
+export ADD_NETWORK_X_Y="700 50"
+#for Nebula export ADD_NETWORK_X_Y="435 765"
+export PUT_TYPE="table"
+#export PUT_TYPE="phone"
 ##For AP
 #--------------------------------------------------------------------------------------
 export NETWORK_MODE_DISABLE="disabled"
