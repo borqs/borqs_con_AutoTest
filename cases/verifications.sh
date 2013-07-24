@@ -5,10 +5,10 @@ function adb_wpa_cli_ping() {
     for((i=0;i<3;i++)); do
     local res=`adb -s ${DEVICES_MASTER} shell wpa_cli ping | grep PONG | awk '{print substr($1,1,4)}'`
     if [ "$res" = "PONG" ]; then
-      echo "$FUNCNAME success"
+      echo "${FUNCNAME} success"
       break
     else
-      [ "$i" = "2" ]  && echo "$FUNCNAME fail"
+      [ "$i" = "2" ]  && echo "${FUNCNAME} fail"
     fi
   done
 }
@@ -17,7 +17,7 @@ function pc_ping_ap(){
   for((i=0; i<3; i++)); do
     local res=`ping -c 3 -i 0.5 $PC_IP_ADDR | grep packet | awk -F ", " '{print $3}'`
     if [ "$res" = "0% packet loss" ] ; then
-      echo "$FUNCNAME success"
+      echo "${FUNCNAME} success"
       break
     else
       [ "$i" = "2" ] && echo "pc_ping_ap fail"
@@ -29,10 +29,10 @@ function adb_ping(){
   for((i=0; i<3; i++)); do
     local res=`adb -s ${DEVICES_MASTER} shell ping -c 2 -i 0.5 $AP_IP_ADDR | grep packet |awk -F ", " '{print $3}'`
     if [ "$res" = "0% packet loss" ] ; then
-      echo "$FUNCNAME success"
+      echo "${FUNCNAME} success"
       break
     else
-      [ "$i" = "2" ] && echo "$FUNCNAME fail"
+      [ "$i" = "2" ] && echo "${FUNCNAME} fail"
     fi
   done
 }
@@ -43,8 +43,9 @@ function adb_wpa_cli_bssid_status(){
   for i in 1 2 3; do
     local cur_bssid=`adb -s ${DEVICES_MASTER} shell wpa_cli status | grep bssid | awk -F "=" '{print substr($2,1,17)}'`
     local state=`adb -s ${DEVICES_MASTER} shell wpa_cli status | grep wpa_state | awk -F "=" '{print substr($2,1,9)}'`
-    if [ "${cur_bssid}" = "${bssid}" ] && [ "${state}" = "COMPLETED" ]; then
-      echo "$FUNCNAME success" && return
+    local ip_addr=`adb -s ${DEVICES_MASTER} shell wpa_cli status | grep ip_address`
+    if [ "${cur_bssid}" = "${bssid}" ] && [ "${state}" = "COMPLETED" ] && [ "${ip_addr}" != "" ]; then
+      echo "${FUNCNAME} success" && return
     fi
     sleep 10s
   done
@@ -60,5 +61,5 @@ function adb_screencap() {
   sleep 3s
   adb -s ${DEVICES_MASTER} pull ${dut_png_path} ${pc_png_path} > /dev/null
 
-  [ -e ${pc_png_path} ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ -e ${pc_png_path} ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
 }

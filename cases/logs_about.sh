@@ -35,7 +35,7 @@ function CUR_WIFI_INFO() {
   echo "${info_ps}" >> ${info_file}
   echo "}" >> ${info_file}
   echo " " >> ${info_file}
-  
+
   echo "=========IFCONFIG:==============================================================================================" >> ${info_file}
   echo "ifconfig: {" >> ${info_file}
   echo "${info_ifconfig}" >> ${info_file}
@@ -70,8 +70,8 @@ function CUR_WIFI_INFO() {
 ##########################################################################################################
 
 function PFT_XXXX_SORT(){
-  local count=`find ./ -type f -print | wc -l`
-  local files=`find ./ -type f -print`
+  local count=`find ./results/ -type f -print | wc -l`
+  local files=`find ./results/ -type f -print`
 
   echo "##################################################################"
   echo "#  Files Count: ${count}                                         #"
@@ -79,13 +79,14 @@ function PFT_XXXX_SORT(){
   echo "##################################################################"
 
   for file in ${files}; do
-    local loc_P=`echo ${file} | grep "PFT_" | expr index ${file} 'P'`
-    local cur_Dir=${file:${loc_P}:7}
-    if [ "${loc_P}" = "0" ]; then
+    local str_file=`echo ${file} | grep "PFT_"`
+    local loc_P=`expr index ${file} 'P'`
+    local cur_Dir=`expr substr ${file} ${loc_P} 8`
+    if [ "${str_file}" = "" ] || [ "${loc_P}" = "0" ]; then
       continue
-    fi  
+    fi
     mkdir -p ${CASE_INFO}/${cur_Dir}
-    cp  -fr ${file} ${CASE_INFO}/${cur_Dir}
+    mv  -f ${file} ${CASE_INFO}/${cur_Dir}
   done
 
   echo "##################################################################"

@@ -81,9 +81,9 @@ function Basic_Wireless_Settings() {
 
   curl --user $user --data "$data" http://192.168.1.1/apply.cgi  > /dev/null
   if [ $? -eq 0 ] ; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 }
 
@@ -167,9 +167,9 @@ function Wireless_Security() {
 
   curl --user $user --data "$data" http://192.168.1.1/apply.cgi  > /dev/null
   if [ $? -eq 0 ] ; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 }
 
@@ -201,9 +201,9 @@ function Basic_Setup() {
   curl --user $user --data "$data" http://192.168.1.1/apply.cgi  > /dev/null
 
   if [ $? -eq 0 ] ; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 }
 
@@ -238,9 +238,9 @@ function WiFi_Protected_Setup() {
 
   curl --user ${user} --data "${data}" http://192.168.1.1/apply.cgi > /dev/null
   if [ $? -eq 0 ] ; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 }
 
@@ -359,23 +359,23 @@ function set_ap_ops() {
   done
 
   if [ "$(Basic_Wireless_Settings network_mode_24g=${network_mode_24g},ssid_24g=${ssid_24g},channel_width_24g=${channel_width_24g},channel_24g=${channel_24g},ssid_broadcast_24g=${ssid_broadcast_24g},network_mode_5g=${network_mode_24g},ssid_5g=${ssid_5g},channel_width_5g=${channel_width_5g},channel_5g=${channel_5g},ssid_broadcast_5g=${ssid_broadcast_5g})" = "Basic_Wireless_Settings fail" ]; then
-    echo "${FUNCNAME} fail" && opt_fail ${func} && return
+    echo "${FUNCNAME} fail" && OPS_FAIL ${func} && return
   fi
 
   sleep 3s
 
   if [ "$(Wireless_Security security_mode_24g=${security_mode_24g},passphrase_24g=${security_mode_24g},security_mode_5g=${security_mode_5g},passphrase_24g=${passphrase_24g},crypto_24g=${crypto_24g},crypto_5g=${crypto_5g},encypt_wep=${encypt_wep})" = "Wireless_Security fail" ]; then
-    echo "${FUNCNAME} fail"  &&  opt_fail ${func} && return
+    echo "${FUNCNAME} fail"  && OPS_FAIL ${func} && return
   fi
 
   sleep 3s
 
   if [ "$(Basic_Setup lan_proto=${lan_proto})" = "Basic_Setup fail" ]; then
-    echo "${FUNCNAME} fail" && opt_fail ${func} && return
+    echo "${FUNCNAME} fail" && OPS_FAIL ${func} && return
   fi
 
   if [ "$(WiFi_Protected_Setup wps_enable=${wps_enable},wps_button_tap=${wps_button_tap},wps_pin_num=${wps_pin_num})" = "WiFi_Protected_Setup fail" ]; then
-    echo "${FUNCNAME} fail" && opt_fail ${func} && return
+    echo "${FUNCNAME} fail" && OPS_FAIL ${func} && return
   fi
 
   sleep 10s

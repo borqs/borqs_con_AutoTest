@@ -1,25 +1,35 @@
 #!/bin/bash
 
-function work_tag() {
-  echo " " >> ${OK_FAIL} && echo "$1 ..." >> ${OK_FAIL}
+function OPS_TAG() {
+  echo "" >> ${OK_FAIL}
+  echo "$1 ..." >> ${OK_FAIL}
 }
 
-function check() {
+function OPS_CHECK() {
   echo "$1 [CHECK]" >> ${OK_FAIL}
+  sleep 1s
 }
 
-function manual() {
+function OPS_MANUAL() {
   echo "$1 [MANUAL]" >> ${OK_FAIL}
+  sleep 1s
 }
 
-function opt_fail() {
-  echo "$1 [FIAL]" >> ${OK_FAIL}
+function OPS_FAIL() {
+  echo "$1 [FAIL]" >> ${OK_FAIL}
+  sleep 1s
 }
 
-function opt_ok() {
+function OPS_OK() {
   echo "$1 [OK]" >> ${OK_FAIL}
+  sleep 1s
 }
 
+function OPS_RET() {
+  echo "$1" >> ${OK_FAIL}
+  echo "ret :$2" >> ${OK_FAIL}
+  sleep 1s
+}
 function cursor_up_rel() {
   local n=$1
   for((i=0; i<$n; i++)); do
@@ -136,9 +146,6 @@ function pick_method_phase2() {
   cursor_click
 }
 
-#################################################################################
-##basic operations: open wifi, close wifi.
-#################################################################################
 [ "{PUT_TYPE}" = "phone" ] &&
 function open_wifi() {
 #from home start settings
@@ -148,7 +155,7 @@ function open_wifi() {
 
 #when be open, return directly
   if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
     return
   fi
 
@@ -158,7 +165,10 @@ function open_wifi() {
   sleep 3s
 
 #check
-  [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+
+#sleep for scan
+  sleep 5s
 } ||
 function open_wifi() {
 #from home start settings
@@ -171,10 +181,13 @@ function open_wifi() {
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
     sleep 2s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] &&
-    echo "$FUNCNAME success"&& cursor_click && return
+    echo "${FUNCNAME} success"&& cursor_click && return
   done
 
-  echo "$FUNCNAME fail"
+  echo "${FUNCNAME} fail"
+
+#sleep for scan
+  sleep 5s
 }
 
 
@@ -187,10 +200,13 @@ function open_wifi_directly() {
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
     sleep 2s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] &&
-    echo "$FUNCNAME success"&& cursor_click && return
+    echo "${FUNCNAME} success"&& cursor_click && return
   done
 
-  echo "$FUNCNAME fail"
+  echo "${FUNCNAME} fail"
+
+#sleep for scan
+  sleep 5s
 }
 
 [ "{PUT_TYPE}" = "phone" ] &&
@@ -208,9 +224,9 @@ function close_wifi() {
   sleep 0.5s
 
   if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ]; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 } ||
 function close_wifi() {
@@ -221,10 +237,10 @@ function close_wifi() {
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
     sleep 2s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ] &&
-    echo "$FUNCNAME success" && cursor_click && return
+    echo "${FUNCNAME} success" && cursor_click && return
   done
 
-  echo "$FUNCNAME fail"
+  echo "${FUNCNAME} fail"
 }
 
 ##Close WiFi from WIRELESS & NETWORKS interface
@@ -236,25 +252,23 @@ function close_wifi_directly() {
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
     sleep 2s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ] &&
-    echo "$FUNCNAME success" && cursor_click && return
+    echo "${FUNCNAME} success" && cursor_click && return
   done
 
-  echo "$FUNCNAME fail"
+  echo "${FUNCNAME} fail"
 }
 
 function reopen_wifi() {
 #from home start settings
   if [ "$(close_wifi)" = "close_wifi success" ] && [ "$(open_wifi)" = "open_wifi success" ]; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 }
 
-#####################################################################################
 ##basic operations: add network, connect first ssid in list, manual scan
 ##                  forget connected ssid.
-#####################################################################################
 function add_network() {
   local arg=$1
   local ssid=${SSID}
@@ -465,12 +479,11 @@ function add_network() {
 #add_network show_mode=true,show_mode_png=1.png,show_password=true,show_password=true,show_password_png=2.png,enable_advances=true
 #add_network mode=${SECURT_MODE_WEP},password="1234567890",show_mode=true,show_mode_png=1.png,show_password=true,show_password=true,show_password_png=2.png,enable_advances=true
 #add_network mode=${SECURT_MODE_DISABLE},show_mode=true,show_mode_png=2.png,enable_advances=true
-#########################################################################################
 function scan_manual() {
   if [ "$(open_wifi)" = "open_wifi fail" ]; then
     [ "$(open_wifi)" = "open_wifi fail" ] &&
     [ "$(open_wifi)" = "open_wifi fail" ] &&
-    echo "$FUNCNAME fail" && return
+    echo "${FUNCNAME} fail" && return
   fi
 #open && scan
   cursor_menu
@@ -478,18 +491,18 @@ function scan_manual() {
   cursor_click
   sleep 3s
 
-  echo "$FUNCNAME success"
+  echo "${FUNCNAME} success"
 }
 
 function wps_pin_tap() {
   if [ "$(open_wifi)" = "open_wifi fail" ]; then
-    echo "$FUNCNAME fail" && return
+    echo "${FUNCNAME} fail" && return
   fi
 
 #open && scan
   adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WPS_PIN_X_Y}
   sleep 3s
-  echo "$FUNCNAME success"
+  echo "${FUNCNAME} success"
 }
 
 function wps_pin_entry() {
@@ -551,7 +564,7 @@ function wps_ops() {
 
   echo "${FUNCNAME} success"
 }
-#########################################################################################
+
 function connect_first_ssid() {
   local arg=$1
   local mode=${SECURT_MODE_WPA_WPA2}
@@ -617,7 +630,7 @@ function connect_first_ssid() {
   if [ "$(open_wifi)" = "open_wifi fail" ]; then
     [ "$(open_wifi)" = "open_wifi fail" ] &&
     [ "$(open_wifi)" = "open_wifi fail" ] &&
-    echo "$FUNCNAME fail" && return
+    echo "${FUNCNAME} fail" && return
   fi
 
 #click first SSID
@@ -712,17 +725,15 @@ function connect_first_ssid() {
 
 #check results
   if [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ]; then
-    echo "$FUNCNAME success"
+    echo "${FUNCNAME} success"
   else
-    echo "$FUNCNAME fail"
+    echo "${FUNCNAME} fail"
   fi
 }
 
 #connect_first_ssid mode=${SECURT_MODE_WEP},password="1234567890",show_password=true,show_password_png=1.png,enable_advances=true,show_advances=true,show_advances_png=2.png
 #connect_first_ssid mode=${SECURT_MODE_DISABLE}
-###########################################################################################
-##
-###########################################################################################
+
 function forget_first_ssid() {
 #  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
 #    echo "${FUNCNAME} fail" && return
@@ -737,35 +748,28 @@ function forget_first_ssid() {
   fi
 }
 
-####################################################################################
 ##clean wifi operations:
-####################################################################################
 function clean_wifi_ops() {
   local tag=$1
 #forget
   cursor_back_home
   [ "$(adb_rm src=${PUT_WPA_SUPPLICANT_CONF})" = "adb_rm fail" ] && echo "${FUNCNAME} fail" && return
-#  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
-#    echo "${FUNCNAME} fail" && opt_fail ${tag} && return
-#  fi
 
 #close
   if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
     [ "$(close_wifi)" = "close_wifi fail" ] &&
     [ "$(close_wifi)" = "close_wifi fail" ] &&
     [ "$(close_wifi)" = "close_wifi fail" ] &&
-    echo "$FUNCNAME fail" && opt_fail ${arg} && return
+    echo "${FUNCNAME} fail" && OPS_FAIL ${arg} && return
   fi
 
 #back home
   cursor_back_home
-  echo "$FUNCNAME success"
+  echo "${FUNCNAME} success"
 }
 
 
-####################################################################################
 ##eg: browser_load_web
-#####################################################################################
 function browser_ops() {
   local arg=$1
   local http=${WEB_INDEX}
@@ -795,7 +799,7 @@ function browser_ops() {
     adb -s ${DEVICES_MASTER} shell curl -o ${PUT_DOWNLOAD_DIR}/${name} ${http} > /dev/null
     sleep 3s
     adb -s ${DEVICES_MASTER} pull ${PUT_DOWNLOAD_DIR}/${name} ${PC_DOWNLOAD_DIR}/${name} > /dev/null
-    [ -e "${PC_DOWNLOAD_DIR}/${name}" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+    [ -e "${PC_DOWNLOAD_DIR}/${name}" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
     return
   fi
 
@@ -804,7 +808,7 @@ function browser_ops() {
   adb -s ${DEVICES_MASTER} shell am start -a android.intent.action.VIEW -d "${http}" > /dev/null
   sleep 5s
 
-  [ "$(adb_screencap png=${png})" = "adb_screencap success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$(adb_screencap png=${png})" = "adb_screencap success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
 }
 
 function airplane_ops() {
@@ -836,11 +840,11 @@ function airplane_ops() {
   elif [ "${allow}" = "false" ]; then
     [ "${tag}" != "1" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   fi
+
+#sleep
+  sleep 15s
 }
 
-###################################################################################
-##
-###################################################################################
 function master_clear() {
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.BACKUP_AND_RESET_SETTINGS > /dev/null
@@ -854,15 +858,12 @@ function master_clear() {
   cursor_click
   for i in 1 2 3 4 5 6 7 8 9 10; do
     local error=`adb get-state`
-    [ "${error}" != "device" ] && echo "$FUNCNAME success" && return
+    [ "${error}" != "device" ] && echo "${FUNCNAME} success" && sleep 150s && return
     sleep 3s
   done
-  echo "$FUNCNAME fail"
+  echo "${FUNCNAME} fail"
 }
 
-##################################################################################
-##
-##################################################################################
 function wifi_advances_ops() {
   local arg=$1
   local show_ip_mac=false
@@ -988,15 +989,12 @@ function adb_push() {
   done
 
   if [ "${src}" = "" ] || [ "${des}" = "" ]; then
-    echo "$FUNCNAME fail" && return
+    echo "${FUNCNAME} fail" && return
   fi
 
-###Check des wether exist or not ?
-#  local check=`adb shell ls ${des} | grep "No such file"`
-#  [ "${check}" = "" ] && echo "$FUNCNAME success" && return
   [ -e ${src} ] ||
   {
-    echo "$FUNCNAME fail" && return
+    echo "${FUNCNAME} fail" && return
   }
 
 #Just come to do job
@@ -1006,7 +1004,7 @@ function adb_push() {
   sleep 1s
 
   check=`adb -s ${DEVICES_MASTER} shell ls ${des} | grep "No such file"`
-  [ "${check}" = "" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "${check}" = "" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
 }
 
 function adb_rm() {
@@ -1027,18 +1025,18 @@ function adb_rm() {
 
 function pc_iperf_c() {
   iperf -c ${PUT_IP_ADDR} -t 30 > /dev/null
-  [ "$?" = "0" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$?" = "0" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
 }
 
 function pc_iperf_s() {
   iperf -sD > /dev/null
-  [ "$?" = "0" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$?" = "0" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
 }
 
 function dut_iperf_c() {
   local tag=$1
   local arr_rate_Mbit=(`adb -s ${DEVICES_MASTER} shell iperf -c ${PC_IP_ADDR} -i 10 -t 30 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
-  [ "${arr_rate_Mbit[*]}" = "" ] && echo "$FUNCNAME fail" && return
+  [ "${arr_rate_Mbit[*]}" = "" ] && echo "${FUNCNAME} fail" && return
   local len=${#arr_rate_Mbit[*]}
   local sum=0
   local avg=0
@@ -1051,13 +1049,13 @@ function dut_iperf_c() {
   avg=`echo "scale=4;${sum} / ${len}" | bc`
   echo "${tag}: ${avg} Mbit/s" >> ${DATA_THROUGHPUT}
   sleep 1s
-  echo "$FUNCNAME success"
+  echo "${FUNCNAME} success"
 }
 
 function dut_iperf_s() {
   local tag=$1
   local arr_rate_Mbit=(`adb -s ${DEVICES_MASTER} shell iperf -s -i 10 -M | grep "Mbits/sec" | awk  -F "MBytes | Mbits/sec" '{ print $2 }'`)
-  [ "${arr_rate_Mbit[*]}" = "" ] && echo "$FUNCNAME fail" && return
+  [ "${arr_rate_Mbit[*]}" = "" ] && echo "${FUNCNAME} fail" && return
   local len=${#arr_rate_Mbit[*]}
   local sum=0
   local avg=0
@@ -1070,7 +1068,7 @@ function dut_iperf_s() {
   avg=`echo "scale=4;${sum} / ${len}" | bc`
   echo "${tag}: ${avg} Mbit/s" >> ${DATA_THROUGHPUT}
   sleep 1s
-  echo "$FUNCNAME success"
+  echo "${FUNCNAME} success"
 }
 
 function pc_kill_9_iperf_s() {
@@ -1113,7 +1111,7 @@ function DUT_Upload_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
   [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
   [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s &&
   [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
-  [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$(dut_iperf_c ${FUNCNAME})" = "dut_iperf_c success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
 }
@@ -1147,7 +1145,7 @@ function DUT_Download_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
     sleep 5s
     [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
   }&
-  [ "$(dut_iperf_s $FUNCNAME)" = "dut_iperf_s success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   fi
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
@@ -1179,7 +1177,7 @@ function DUT_Upload_Data_Throughput_Network_80211A_RSSI_50_to_70() {
   [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
   [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s &&
   [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
-  [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$(dut_iperf_c ${FUNCNAME})" = "dut_iperf_c success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
 }
@@ -1213,7 +1211,7 @@ function DUT_Download_Data_Throughput_Network_80211A_RSSI_50_to_70() {
     sleep 5s
     [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
   }&
-  [ "$(dut_iperf_s $FUNCNAME)" = "dut_iperf_s success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   fi
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
@@ -1245,7 +1243,7 @@ function DUT_Upload_Data_Throughput_Network_80211N_RSSI_50_to_70() {
   [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
   [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s &&
   [ "$(pc_iperf_s)" = "pc_iperf_s success" ] &&
-  [ "$(dut_iperf_c $FUNCNAME)" = "dut_iperf_c success" ] && echo "$FUNCNAME success" || echo "$FUNCNAME fail"
+  [ "$(dut_iperf_c ${FUNCNAME})" = "dut_iperf_c success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
 }
