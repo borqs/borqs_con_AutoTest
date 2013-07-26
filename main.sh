@@ -13,10 +13,6 @@ function main() {
   BASH_CLEAN
 
   while read oneline ; do
-    #Clean last case logs
-    echo "" > ${STDOUT_LOG}
-    sleep 1s
-
     local func=`echo ${oneline} | awk -F "=" '{print $1}'`  
     local enabled=`echo ${oneline} | awk -F "=" '{print $2}'`
 
@@ -36,34 +32,31 @@ function main() {
         elif [ "${ret}" = "${RET_FAIL}" ]; then
           times_fail=`expr ${times_fail} + 1`
           OPS_FAIL ${func}
+          adb_screencap png=${func}_fail.png
         elif [ "${ret}" = "${RET_MANUAL}" ]; then
           times_manual=`expr ${times_manual} + 1`
           OPS_MANUAL ${func}
         else 
           OPS_RET ${func} "${ret}"
+          adb_screencap png=${func}_error.png
         fi
 
         #Get some information, such as ps, aplog, dumpsys wifi .etc
         CUR_WIFI_INFO func=${func}
       echo "}  LOG END << ${func}"
+      #Sort these files.
+      PFT_XXXX_SORT
     fi
-
-    #Save current screen buffer as a file. 
-    cat ${STDOUT_LOG} > $(pwd)/results/${func}_log.txt &
-    #Sort these files.
-    sleep 5s
-    PFT_XXXX_SORT
-  #Clean current logs 
   done < $(pwd)/config.txt
 
   #Summarize test results
-  echo "################################################################################################################"
-  echo "##############################TEST RESULTS : ###################################################################"
-  echo "#####Total Cases: ${times_total}"
-  echo "#####        Success Cases: ${times_ok}, Fail Cases: ${times_fail}"
-  echo "#####        Check   Cases: ${times_check}, Mannual Cases: ${times_manual}"
-  echo "#####        Fail Rate: `expr ${times_fail} \* 100 / ${times_total}`"
-  echo "################################################################################################################"
+  echo "#########################################################################################################" >> ${OK_FAIL}
+  echo "##############################TEST RESULTS : ############################################################" >> ${OK_FAIL}
+  echo "#####Total Cases: ${times_total}"                                                                          >> ${OK_FAIL}
+  echo "#####        Success Cases: ${times_ok}, Fail Cases: ${times_fail}"                                        >> ${OK_FAIL}
+  echo "#####        Check   Cases: ${times_check}, Mannual Cases: ${times_manual}"                                >> ${OK_FAIL}
+  echo "#####        Fail Rate: `expr ${times_fail} \* 100 / ${times_total}` %"                                    >> ${OK_FAIL}
+  echo "#########################################################################################################" >> ${OK_FAIL}
 }
 
 main

@@ -146,7 +146,7 @@ function pick_method_phase2() {
   cursor_click
 }
 
-[ "{PUT_TYPE}" = "phone" ] &&
+[ "${PUT_TYPE}" = "phone" ] &&
 function open_wifi() {
 #from home start settings
   cursor_back_home
@@ -161,14 +161,13 @@ function open_wifi() {
 
 #open wifi
   cursor_go 0
-  cursor_click
-  sleep 3s
+  for i in 1 2 3; do
+    cursor_click
+    sleep 3s
+    [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] && echo "${FUNCNAME} success" && sleep 5s && return
+  done
 
-#check
-  [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
-
-#sleep for scan
-  sleep 5s
+  echo "${FUNCNAME} fail"
 } ||
 function open_wifi() {
 #from home start settings
@@ -176,18 +175,20 @@ function open_wifi() {
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
   sleep 1s
 
+#when be open, return directly
+  if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
+    cursor_right && echo "${FUNCNAME} success" && return
+  fi
+
 #open wifi
   for i in 1 2 3 ; do
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
-    sleep 2s
+    sleep 3s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] &&
-    echo "${FUNCNAME} success"&& cursor_click && return
+    echo "${FUNCNAME} success"&& cursor_click && cursor_right && sleep 5s && return
   done
 
   echo "${FUNCNAME} fail"
-
-#sleep for scan
-  sleep 5s
 }
 
 
@@ -196,48 +197,60 @@ function open_wifi_directly() {
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
 
+#when be open, return directly
+  if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
+    echo "${FUNCNAME} success"
+    return
+  fi
+
+#open wifi
   for i in 1 2 3 ; do
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
-    sleep 2s
+    sleep 3s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ] &&
-    echo "${FUNCNAME} success"&& cursor_click && return
+    echo "${FUNCNAME} success"&& cursor_click && cursor_right && sleep 5s && return
   done
 
   echo "${FUNCNAME} fail"
-
-#sleep for scan
-  sleep 5s
 }
 
-[ "{PUT_TYPE}" = "phone" ] &&
+[ "${PUT_TYPE}" = "phone" ] &&
 function close_wifi() {
 #from home to wifi settting
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.WIFI_SETTINGS > /dev/null
   sleep 1s
 
-## When be open, close it
-  if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
-    reset_cursor_to_top
-    cursor_click
-  fi
-  sleep 0.5s
-
   if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ]; then
     echo "${FUNCNAME} success"
-  else
-    echo "${FUNCNAME} fail"
+    return
   fi
+
+## When be open, close it
+  reset_cursor_to_top
+  for i in 1 2 3 4 5 6; do
+    cursor_click
+    sleep 3s
+    [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ] && echo "${FUNCNAME} success" && sleep 5s && return
+  done
+
+  echo "${FUNCNAME} fail"
 } ||
 function close_wifi() {
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
+  sleep 1s
 
-  for i in 1 2 3 ; do
+  if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ]; then
+    echo "${FUNCNAME} success"
+    return
+  fi
+
+  for i in 1 2 3 4 5 6; do
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
-    sleep 2s
+    sleep 3s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ] &&
-    echo "${FUNCNAME} success" && cursor_click && return
+    echo "${FUNCNAME} success" && cursor_click && sleep 5s && return
   done
 
   echo "${FUNCNAME} fail"
@@ -248,11 +261,16 @@ function close_wifi_directly() {
   cursor_back_home
   adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
 
-  for i in 1 2 3 ; do
+  if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ]; then
+    echo "${FUNCNAME} success"
+    return
+  fi
+
+  for i in 1 2 3 4 5 6; do
     adb -s ${DEVICES_MASTER} shell input touchscreen tap ${WIRELESS_NETWORK_WIFI_X_Y}
-    sleep 2s
+    sleep 3s
     [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping fail" ] &&
-    echo "${FUNCNAME} success" && cursor_click && return
+    echo "${FUNCNAME} success" && cursor_click && sleep 5s && return
   done
 
   echo "${FUNCNAME} fail"
@@ -260,11 +278,13 @@ function close_wifi_directly() {
 
 function reopen_wifi() {
 #from home start settings
-  if [ "$(close_wifi)" = "close_wifi success" ] && [ "$(open_wifi)" = "open_wifi success" ]; then
-    echo "${FUNCNAME} success"
-  else
-    echo "${FUNCNAME} fail"
-  fi
+  for i in 1 2 3; do
+    if [ "$(close_wifi)" = "close_wifi success" ] && [ "$(open_wifi)" = "open_wifi success" ]; then
+      echo "${FUNCNAME} success" && return
+    fi
+    sleep 5s
+  done
+  echo "${FUNCNAME} fail"
 }
 
 ##basic operations: add network, connect first ssid in list, manual scan
@@ -735,17 +755,16 @@ function connect_first_ssid() {
 #connect_first_ssid mode=${SECURT_MODE_DISABLE}
 
 function forget_first_ssid() {
-#  if [ "$(adb_push src=${PC_WPA_SUPPLICANT_CONF},des=${PUT_WPA_SUPPLICANT_CONF})" = "adb_push fail" ]; then
-#    echo "${FUNCNAME} fail" && return
-#  fi
   [ "$(adb_rm src=${PUT_WPA_SUPPLICANT_CONF})" = "adb_rm fail" ] && echo "${FUNCNAME} fail" && return
   sleep 3s
-  if [ "$(reopen_wifi)" = "reopen_wifi success" ]; then
-    sleep 3s
-    [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
-  else
-    echo "${FUNCNAME} fail"
-  fi
+  for i in 1 2 3; do
+    if [ "$(reopen_wifi)" = "reopen_wifi success" ]; then
+      sleep 5s
+      [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] && echo "${FUNCNAME} success" && return
+    fi
+    sleep 5s
+  done
+  echo "${FUNCNAME} fail"
 }
 
 ##clean wifi operations:
@@ -754,20 +773,23 @@ function clean_wifi_ops() {
 #forget
   cursor_back_home
   [ "$(adb_rm src=${PUT_WPA_SUPPLICANT_CONF})" = "adb_rm fail" ] && echo "${FUNCNAME} fail" && return
-
+  adb -s ${DEVICES_MASTER} shell rm -fr /data/PFT_* > /dev/null
 #close
   if [ "$(adb_wpa_cli_ping)" = "adb_wpa_cli_ping success" ]; then
-    [ "$(close_wifi)" = "close_wifi fail" ] &&
-    [ "$(close_wifi)" = "close_wifi fail" ] &&
-    [ "$(close_wifi)" = "close_wifi fail" ] &&
-    echo "${FUNCNAME} fail" && OPS_FAIL ${arg} && return
+    for i in 1 2 3 ;do
+      if [ "$(close_wifi)" = "close_wifi success" ]; then
+        break
+      else
+        sleep 5s
+      fi
+      [ "${i}" = "3" ] && echo "${FUNCNAME} fail" && OPS_FAIL ${tag}_${FUNCNAME} && cursor_back_home && return
+    done
   fi
 
 #back home
   cursor_back_home
   echo "${FUNCNAME} success"
 }
-
 
 ##eg: browser_load_web
 function browser_ops() {
@@ -813,10 +835,27 @@ function browser_ops() {
 
 function airplane_ops() {
   local allow=$1
-  [ "${allow}" != "false" ] && [ "${allow}" != "true" ] && "echo ${FUNCNAME} fail" && return
+  [ "${allow}" != "false" ] && [ "${allow}" != "true" ] && echo "${FUNCNAME} fail" && return
 
   local select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`
   local tag=`echo ${select} | grep "airplane_mode_on" | awk -F "|" '{ print substr($3,1,1) }'`
+
+  cursor_back_home
+
+  if [ "${PUT_TYPE}" = "phone" ]; then
+    adb -s ${DEVICES_MASTER} shell am start -a android.settings.AIRPLANE_MODE_SETTINGS > /dev/null
+    cursor_go 1
+  else
+    adb -s ${DEVICES_MASTER} shell am start -a android.settings.SETTINGS > /dev/null
+    cursor_go 0
+    cursor_left
+    cursor_down
+    cursor_down
+    cursor_down
+    cursor_click
+    cursor_right
+    cursor_go 0
+  fi
 
   if [ "${allow}" = "true" ]; then
     [ "${tag}" = "1" ] && echo "${FUNCNAME} success" && return
@@ -824,12 +863,6 @@ function airplane_ops() {
     [ "${tag}" != "1" ] && echo "${FUNCNAME} success" && return
   fi
 
-  cursor_back_home
-  adb -s ${DEVICES_MASTER} shell am start -a android.settings.AIRPLANE_MODE_SETTINGS > /dev/null
-  [ "PUT_TYPE" = "phone" ] && cursor_go 1 || {
-  cursor_right
-  cursor_go 0
-  }
   cursor_click
 
   select=`adb -s ${DEVICES_MASTER} shell sqlite3  /data/data/com.android.providers.settings/databases/settings.db "select * from global where name = 'airplane_mode_on';"`
@@ -952,7 +985,7 @@ function screen_captrue_ssid_ops() {
   elif [ "${locate}" = "last" ]; then
 ##When ap in list more than one screen, It a BUG !!!
     reset_cursor_to_bottom_20
-    cursor_up
+    [ "${PUT_TYPE}" = "phone" ] && cursor_up
     cursor_click
   fi
   sleep 3s
@@ -1141,11 +1174,13 @@ function DUT_Download_Data_Throughput_Network_80211BG_RSSI_50_to_70() {
      [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
      [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
      [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s ;then
-  {
-    sleep 5s
-    [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
-  }&
-  [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+     {
+       sleep 5s
+       pc_iperf_c
+       sleep 3s
+       dut_kill_9_iperf_s
+     }&
+     [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   fi
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
@@ -1207,11 +1242,13 @@ function DUT_Download_Data_Throughput_Network_80211A_RSSI_50_to_70() {
      [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
      [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
      [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s ;then
-  {
-    sleep 5s
-    [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
-  }&
-  [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+     {
+       sleep 5s
+       pc_iperf_c
+       sleep 3s
+       dut_kill_9_iperf_s
+     }&
+     [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   fi
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
@@ -1236,7 +1273,7 @@ function DUT_Upload_Data_Throughput_Network_80211N_RSSI_50_to_70() {
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
 
-  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N},security_mode_24g=${SECURT_MODE_WPA2_PERSONAL})" = "set_ap_ops fail" ] && return
 
   [ "$(add_network enable_advances=true)" = "add_network success" ] &&
   [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
@@ -1267,17 +1304,19 @@ function DUT_Download_Data_Throughput_Network_80211N_RSSI_50_to_70() {
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
 
-  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N})" = "set_ap_ops fail" ] && return
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N},security_mode_24g=${SECURT_MODE_WPA2_PERSONAL})" = "set_ap_ops fail" ] && return
 
   if [ "$(add_network enable_advances=true)" = "add_network success" ] &&
      [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
      [ "$(screen_captrue_ssid_ops locate='first',png=${png})" = "screen_captrue_ssid_ops success" ] &&
      [ "$(adb_push src=${PC_IPERF},des=${PUT_IPERF})" = "adb_push success" ] && sleep 3s ; then
-  {
-    sleep 5s
-    [ "$(pc_iperf_c)" = "pc_iperf_s fail" ] && return || dut_kill_9_iperf_s
-  }&
-  [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
+     {
+       sleep 5s
+       pc_iperf_c
+       sleep 3s
+       dut_kill_9_iperf_s
+     }&
+     [ "$(dut_iperf_s ${FUNCNAME})" = "dut_iperf_s success" ] && echo "${FUNCNAME} success" || echo "${FUNCNAME} fail"
   fi
   pc_kill_9_iperf_s
   dut_kill_9_iperf_s
