@@ -1850,7 +1850,7 @@ function PFT_2674_Edhcp_Sssid_WPA_WPA2_TKIP_AES_NoStatic_WrongPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
   [ "$(set_ap_ops func=${FUNCNAME},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return ${RET_FAIL}
 
-  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},eap_user_password=${EAP_USER_PASSWORD_WRONG})" = "connect_first_ssid success" ] &&
+  [ "$(connect_first_ssid mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},eap_user_password=${EAP_USER_PASSWORD_WRONG})" = "connect_first_ssid fail" ] &&
   [ "$(screen_captrue_ssid_ops locate='head',png=${FUNCNAME}_1_wrong_password_head.png)" = "screen_captrue_ssid_ops success" ] &&
 
   [ "$(forget_first_ssid)" = "forget_first_ssid success" ] &&
@@ -1860,7 +1860,6 @@ function PFT_2674_Edhcp_Sssid_WPA_WPA2_TKIP_AES_NoStatic_WrongPWD_ForgetAP() {
   [ "$(screen_captrue_ssid_ops locate='tail',png=${FUNCNAME}_4_dis_tail.png)" = "screen_captrue_ssid_ops success" ] &&
   return ${RET_CHECK} || return ${RET_FAIL}
 }
-
 
 function PFT_2675_Edhcp_Sssid_WPA_TKIP_Static_CorrectPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
@@ -1918,7 +1917,7 @@ function PFT_2679_Edhcp_Sssid_WPA_WPA2_Static_CorrectPWD_ForgetAP() {
 
 function PFT_2680_Edhcp_Hssid_WPA_TKIP_NoStatic_CorrectPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
-  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return ${RET_FAIL}
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},security_mode_24g=${SECURT_MODE_WPA_ENTERPRISE},crypto_24g=${CRYPT_24G_TKIP})" = "set_ap_ops fail" ] && return ${RET_FAIL}
 
   [ "$(open_wifi)" = "open_wifi success" ] &&
   [ "$(adb_screencap png=${FUNCNAME}_1_verify_HSSID.png)" = "adb_screencap success" ] &&
@@ -1944,9 +1943,9 @@ function PFT_2682_Edhcp_Hssid_WPA2_TKIP_NoStatic_CorrectPWD_ForgetAP() {
 
 function PFT_2683_Edhcp_Hssid_WPA2_AES_NoStatic_CorrectPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
-  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return ${RET_FAIL}
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return ${RET_FAIL}
 
-  [ "$(open_wifi)" = "open_wifi" ] &&
+  [ "$(open_wifi)" = "open_wifi success" ] &&
   [ "$(adb_screencap png=${FUNCNAME}_verify_HSSID_1.png)" = "adb_screencap success" ] &&
 
   [ "$(add_network mode=${SECURT_MODE_WPA2_ENTERPRISE})" = "add_network success" ] &&
@@ -1963,7 +1962,7 @@ function PFT_2683_Edhcp_Hssid_WPA2_AES_NoStatic_CorrectPWD_ForgetAP() {
 
 function PFT_2684_Edhcp_Hssid_WPA_WPA2_NoStatic_CorrectPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
-  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return ${RET_FAIL}
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return ${RET_FAIL}
 
   [ "$(open_wifi)" = "open_wifi success" ] &&
   [ "$(adb_screencap png=${FUNCNAME}_1_verify_HSSID_1.png)" = "adb_screencap success" ] &&
@@ -1982,7 +1981,7 @@ function PFT_2684_Edhcp_Hssid_WPA_WPA2_NoStatic_CorrectPWD_ForgetAP() {
 
 function PFT_2685_Edhcp_Hssid_WPA_WPA2_TKIP_AES_NoStatic_WrongPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
-  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return ${RET_FAIL}
+  [ "$(set_ap_ops func=${FUNCNAME},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return ${RET_FAIL}
 
   [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},eap_user_password=${EAP_USER_PASSWORD_WRONG})" = "add_network success" ] &&
   [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status fail" ] &&
@@ -2125,7 +2124,7 @@ function PFT_2696_Ddhcp_Hssid_WPA2_TKIP_Static_CorrectPWD_ForgetAP() {
 
 function PFT_2697_Ddhcp_Hssid_WPA2_AES_Static_CorrectPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
-  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return ${RET_FAIL}
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},security_mode_24g=${SECURT_MODE_WPA2_ENTERPRISE},crypto_24g=${CRYPT_24G_AES})" = "set_ap_ops fail" ] && return ${RET_FAIL}
 
   [ "$(add_network mode=${SECURT_MODE_WPA2_ENTERPRISE},enable_advances=true)" = "add_network success" ] &&
   [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
@@ -2141,7 +2140,7 @@ function PFT_2697_Ddhcp_Hssid_WPA2_AES_Static_CorrectPWD_ForgetAP() {
 
 function PFT_2698_Ddhcp_Hssid_WPA_WPA2_Static_CorrectPWD_ForgetAP() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
-  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_HIDE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return ${RET_FAIL}
+  [ "$(set_ap_ops func=${FUNCNAME},lan_proto=${DHCP_SERVER_DISABLE},ssid_broadcast_24g=${SSID_BROADCAST_DISENABLE},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE},crypto_24g=${CRYPT_24G_MIXED})" = "set_ap_ops fail" ] && return ${RET_FAIL}
 
   [ "$(add_network mode=${SECURT_MODE_ENTERPRISE_MIXED_MODE},enable_advances=true)" = "add_network success" ] &&
   [ "$(adb_wpa_cli_bssid_status)" = "adb_wpa_cli_bssid_status success" ] &&
