@@ -2156,23 +2156,23 @@ function PFT_2698_Ddhcp_Hssid_WPA_WPA2_Static_CorrectPWD_ForgetAP() {
 
 function PFT_2699_Connect_AP_with_b_g_n_bg_bgn() {
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops fail" ] && return ${RET_FAIL}
-  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_B})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_B},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid success" ] &&
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
-  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_G})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_G},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid success" ] &&
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
-  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N},security_mode_24g=${SECURT_MODE_WPA2_PERSONAL})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_N},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid success" ] &&
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
-  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_BG})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_BG},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid success" ] &&
 
   [ "$(clean_wifi_ops ${FUNCNAME})" = "clean_wifi_ops success" ] &&
-  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_MIXED})" = "set_ap_ops success" ] &&
+  [ "$(set_ap_ops func=${FUNCNAME},network_mode_24g=${NETWORK_MODE_MIXED},security_mode_24g=${SECURT_MODE_ENTERPRISE_MIXED_MODE})" = "set_ap_ops success" ] &&
   [ "$(connect_first_ssid mode=${SECURT_MODE_WPA_ENTERPRISE})" = "connect_first_ssid success" ] &&
 
   return ${RET_CHECK} || return ${RET_FAIL}
